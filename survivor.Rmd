@@ -1,5 +1,5 @@
 ---
-title: "Survivor"
+title: "Gov 1005 4/5 Milestone for Final Project"
 author: "Evelyn Cai"
 date: "April 5, 2019"
 output: html_document
@@ -61,7 +61,7 @@ x %>%
   geom_histogram(show.legend =FALSE) +
   # Add appropriate labels
   labs(title = "Individual Challenge Wins By Post-Merge Constestants In 38 Seasons of Survivor",
-       subtitle = "Skewed right plots for number of individual wins show sthat they are rare for both genders, although more on the high extreme for men",
+       subtitle = "Skewed right plots for number of individual wins show that they are rare for both genders,\n although more on the high extreme for men",
        caption = "Source: https://raw.githubusercontent.com/davekwiatkowski/survivor-data/master/player-data.json") +
   # Facet by gender to see if there are any signifcant discrepanices
   facet_grid(~gender)
