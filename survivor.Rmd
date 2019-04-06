@@ -5,6 +5,22 @@ date: "April 5, 2019"
 output: html_document
 ---
 
+## Survivor and Data Science
+
+### Overview of Data
+
+My data set comes from the github json file found here: https://raw.githubusercontent.com/davekwiatkowski/survivor-data/master/player-data.json. It contains the information of all past Survivor players in 38 seasons (most seasons have 20 people, although anomalous seasons have a few less due to casting reasons or unexpected cancellations). The data was compiled while Season 38 was being aired, so only the first few episodes of Season 38 are accounted for. That aside, it is a rather clean and complete data set, containing the names, hometowns, ages, sexes, number of days lasted, number of individual Challenge wins, number of tribal challenge wins, total number of wins, number of votes received against them, place finished, the name of their season, occupations, and URLS to their pictures and profiles, as well as a lot of trivia points. For my purposes, I will not be needing the trivia, as there's no way to really analyze that, and will most likely not need to use the picture and profile links, but I have not unselected those just in case I would like to use them.
+
+### What I Did With It and What I Plan to Do
+  For ease of use, I just converted the json file to a csv and read in the csv, which won't be a problem going forward, as I will be appending the csv file with the complete information of season 28 (it finished airing last fall), as well as at least three new columns corresponding to a) which season number they played in, b) which months and years the seasons were shot in, and c) their racial identity. Since Survivor is a dynamic game that has evolved dramatically since the first season in the early, early 2000s, it would be nice to have a disclaimer that lets the viewer know that a lot of the wins were achieved under very different circumstances, made even more complex by the twists and turnst hat Survivor introduces with every new season.
+  
+  In terms of the ultimate, I want to be able to answer some key questions through my graphics. First, is there a "type" of player that wins (more physical, meaning they win more tribal and individual immunity challenges or more strategic, meaning they put a lot of weight into their social relationships and navigate the voting system well)? Secondly, are there relationships between the number of days lasted/ the place that someone finishes in, and their occupation, or gender, or age, or race? Thirdly, what sets apart those who last to 39 days together and those who become the Sole Survivor (three people last until the last day, but only one wins, by a vote by the Jury of the ten-or-so people who were voted out post-merge)? Another aspect I am very curious about is the impact of reward challenge wins and how it relates to overall placement (do those who win more reward challenges fare better overall because they are healthier and more capable of winning other physical challenges and devoting their energy to scheming, or does it have th eopposite effect of making people too comfortable in their place in the game and too complacenet?) and how it directly impacts the next challenge (whether it does increase the odds of winning the next physical challenge, whether it be individual or tribal or reward). This data is most likely not available online, meaning that I would probably have to sift at least a couple of the most recent seasons' episodes to determine who won which challenge, which should be feasible if it's only one or two seasons!
+  
+  In terms of visualizations, I definitely want to create a map of some sort to indicate where Survivor conestants come from i the United States, likely by using the sf package. I also liked the final project by Kai in which she used cool interactive plotly stuff to show her data by filtering, so I want to do that too:)
+  
+  Currently, I have  read in the data and ensured some of the variables are read as doubles rather than characters, deleted the trivia rows and started to compile the data for racial identity. Got a long ways to go to accomplish all that I want to do!
+
+
 ```{r setup, include=FALSE, warning = FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 # Load libraries
@@ -21,9 +37,12 @@ x <- read_csv("survivor.csv",
               # Also specify that the number of total votes one received is a double
               votesAgainst = col_double(),
               # Specify that the number of tribal challenge wins is a double
-              tribalChallengeWins = col_double())) %>%
+              tribalChallengeWins = col_double(),
+              individualChallengeWins = col_double())) %>%
       # Separate the hometown column into the city and state abbreviation, which we will later use to map out where Survivor contestants and winners hail from in the country by city and state
       separate(col = "hometown", sep =  c(", "), into = c("city", "state_abbr")) %>%
+      # Rename runner-ups to 2nd place
+# Next steps: mutate/ relabel finish "runner-up" as 2nd and "Sole Survivor" as 1st, then change all the whole column into doubles
       # Unselect columns that pertain to player trivia, as they are strings of interesting facts that do not contribute to our data.
       select(-(contains("trivia"))) 
 ```
@@ -37,9 +56,13 @@ x %>%
          # Filter out those who lasted less than two weeks, or 14 days. Since the merge is usually the mid-way point and contain around a dozen remaining contestants, it varies season to season, but the merge has never occurred prior to the two week mark.
          daysLasted > 14) %>%
   # Create a ggplot, with the x-axis as the number of individual challenge wins, and the y-axis as the number of days lasted
-  ggplot(mapping = aes(x = individualChallengeWins, y = daysLasted)) +
-  # Plot out the points
-  geom_jitter(show.legend = FALSE) +
-  xlab(NULL) +
+  ggplot(mapping = aes(x = individualChallengeWins)) +
+  # Plot out the points with a little jitter just to see the distribution (will change later since the jitter leads us to falsely believe that some lasted over forty days which is impossible).
+  geom_histogram(show.legend =FALSE) +
+  # Add appropriate labels
+  labs(title = "Individual Challenge Wins By Post-Merge Constestants In 38 Seasons of Survivor",
+       subtitle = "Skewed right plots for number of individual wins show sthat they are rare for both genders, although more on the high extreme for men",
+       caption = "Source: https://raw.githubusercontent.com/davekwiatkowski/survivor-data/master/player-data.json") +
+  # Facet by gender to see if there are any signifcant discrepanices
   facet_grid(~gender)
 ```
