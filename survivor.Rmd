@@ -21,48 +21,150 @@ My data set comes from the github json file found here: https://raw.githubuserco
   Currently, I have  read in the data and ensured some of the variables are read as doubles rather than characters, deleted the trivia rows and started to compile the data for racial identity. Got a long ways to go to accomplish all that I want to do!
 
 
-```{r setup, include=FALSE, warning = FALSE}
+```{r setup_libraries, include=FALSE, warning = FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+
 # Load libraries
+
 library(tidyverse)
 library(gganimate)
 library(ggplot2)
+```
+
+```{r setup_x, warning = FALSE, message = FALSE}
 
 # Read in the CSV file visa read_csv
+
 x <- read_csv("survivor.csv",
+              
               # specify the column types, or else they will be read in as characters
+              
               col_types = cols(
+                
               # Specify the number of days as a double
+                
               daysLasted = col_double(),
+              
               # Also specify that the number of total votes one received is a double
+              
               votesAgainst = col_double(),
+              
               # Specify that the number of tribal challenge wins is a double
+              
               tribalChallengeWins = col_double(),
               individualChallengeWins = col_double())) %>%
-      # Separate the hometown column into the city and state abbreviation, which we will later use to map out where Survivor contestants and winners hail from in the country by city and state
+  
+      # Separate the hometown column into the city and state abbreviation, which
+      # we will later use to map out where Survivor contestants and winners hail
+      # from in the country by city and state
+  
       separate(col = "hometown", sep =  c(", "), into = c("city", "state_abbr")) %>%
-      # Rename runner-ups to 2nd place
-# Next steps: mutate/ relabel finish "runner-up" as 2nd and "Sole Survivor" as 1st, then change all the whole column into doubles
-      # Unselect columns that pertain to player trivia, as they are strings of interesting facts that do not contribute to our data.
+  
+      # Rename runner-ups to 2nd place, sole survivors to 1st place, and recode
+      # from character strings to doubles
+  
+      mutate(finish = fct_recode(finish,
+                                 `1` = "Sole Survivor",
+                                 `2` = "Runner-Up",
+                                 `3` = "3rd",
+                                 `4` = "4th",
+                                 `5` = "5th",
+                                 `6` = "6th",
+                                 `7` = "7th",
+                                 `8` = "8th",
+                                 `9` = "9th",
+                                 `10` = "10th",
+                                 `11` = "11th",
+                                 `12` = "12th",
+                                 `13` = "13th",
+                                 `14` = "14th",
+                                 `15` = "15th",
+                                 `16` = "16th",
+                                 `17` = "17th",
+                                 `18` = "18th",
+                                 `19` = "19th",
+                                 `20` = "20th"),
+             
+             # Create a new column using case_when that details which number a
+             # season was based on the title of the season
+             
+             season_number = case_when(
+               season == "Borneo" ~ `1`,
+               season == "The Australian Outback" ~ `2`,
+               season == "Africa" ~ `3`,
+               season == "Marquesas" ~ `4`,
+               season == "Thailand" ~ `5`,
+               season == "The Amazon" ~ `6`,
+               season == "Pearl Island" ~ `7`,
+               season == "All-Stars" ~ `8`,
+               season == "Vanuatu" ~ `9`,
+               season == "Palau" ~ `10`,
+               season == "Guatemala" ~ `11`,
+               season == "Panama" ~ `12`,
+               season == "Cook Islands" ~ `13`,
+               season == "Fiji" ~ `14`,
+               season == "China" ~ `15`,
+               season == "Micronesia" ~ `16`,
+               season == "Gabon" ~ `17`,
+               season == "Tocantins" ~ `18`,
+               season == "Samoa" ~ `19`,
+               season == "Heroes vs. Villains" ~ `20`,
+               season == "Nicaragua" ~ `21`,
+               season == "Redemption Island" ~ `22`,
+               season == "South Pacific" ~ `23`,
+               season == "One World" ~ `24`,
+               season == "Philippines" ~ `25`,
+               season == "Caramoan" ~ `26`,
+               season == "Blood vs. Water" ~ `27`,
+               season == "Cagayan" ~ `28`,
+               season == "San Juan del Sur" ~ `29`,
+               season == "Worlds Apart" ~ `30`,
+               season == "Cambodia" ~ `31`,
+               season == "Kaôh Rong" ~ `32`,
+               season == "Millennials vs. Gen X" ~ `33`,
+               season == "Game Changers" ~ `34`,
+               season == "Heroes vs. Healers vs. Hustlers" ~ `35`,
+               season == "Ghost Island" ~ `36`,
+               season == "David vs. Goliath" ~ `37`)) %>%
+
+  
+  
+  
+      # Unselect columns that pertain to player trivia, as they are strings of
+      # interesting facts that do not contribute to our data.
+  
       select(-(contains("trivia"))) 
 ```
 
 ``` {r Cool Graphic, message = FALSE, warning = FALSE}
 
 # Create a graphic that shows the number of individual challenge wins for contestants still in the game after the "merge" versus the number of days lasted faceted by gender
+
 x %>%
+  
   # Filter out the N/A values for individual challenge wins, which indicates that the contestant was voted out before the merge
+  
   filter(individualChallengeWins != "N/A",
+         
          # Filter out those who lasted less than two weeks, or 14 days. Since the merge is usually the mid-way point and contain around a dozen remaining contestants, it varies season to season, but the merge has never occurred prior to the two week mark.
+         
          daysLasted > 14) %>%
+  
   # Create a ggplot, with the x-axis as the number of individual challenge wins, and the y-axis as the number of days lasted
+  
   ggplot(mapping = aes(x = individualChallengeWins)) +
+  
   # Plot out the points with a little jitter just to see the distribution (will change later since the jitter leads us to falsely believe that some lasted over forty days which is impossible).
+  
   geom_histogram(show.legend =FALSE) +
+  
   # Add appropriate labels
+  
   labs(title = "Individual Challenge Wins By Post-Merge Constestants In 38 Seasons of Survivor",
        subtitle = "Skewed right plots for number of individual wins show that they are rare for both genders,\n although more on the high extreme for men",
        caption = "Source: https://raw.githubusercontent.com/davekwiatkowski/survivor-data/master/player-data.json") +
-  # Facet by gender to see if there are any signifcant discrepanices
+  
+  # Facet by gender to see if there are any signficant discrepanices
+  
   facet_grid(~gender)
 ```
