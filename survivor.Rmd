@@ -54,87 +54,131 @@ x <- read_csv("survivor.csv",
               tribalChallengeWins = col_double(),
               individualChallengeWins = col_double())) %>%
   
-      # Separate the hometown column into the city and state abbreviation, which
-      # we will later use to map out where Survivor contestants and winners hail
-      # from in the country by city and state
+  # Unselect columns that pertain to player trivia, as they are strings of
+  # interesting facts that do not contribute to our data.
   
-      separate(col = "hometown", sep =  c(", "), into = c("city", "state_abbr")) %>%
+  select(-(contains("trivia"))) 
+```
+
+
+```{r cleanup, message = FALSE, error = FALSE}
+
+survivor_data <- x %>%
+
+    # Separate the hometown column into the city and state abbreviation, which
+    # we will later use to map out where Survivor contestants and winners hail
+    # from in the country by city and state
   
-      # Rename runner-ups to 2nd place, sole survivors to 1st place, and recode
-      # from character strings to doubles
+    separate(col = "hometown", sep =  c(", "), into = c("city", "state_abbr")) %>%
   
-      mutate(finish = fct_recode(finish,
-                                 `1` = "Sole Survivor",
-                                 `2` = "Runner-Up",
-                                 `3` = "3rd",
-                                 `4` = "4th",
-                                 `5` = "5th",
-                                 `6` = "6th",
-                                 `7` = "7th",
-                                 `8` = "8th",
-                                 `9` = "9th",
-                                 `10` = "10th",
-                                 `11` = "11th",
-                                 `12` = "12th",
-                                 `13` = "13th",
-                                 `14` = "14th",
-                                 `15` = "15th",
-                                 `16` = "16th",
-                                 `17` = "17th",
-                                 `18` = "18th",
-                                 `19` = "19th",
-                                 `20` = "20th"),
+    # Rename runner-ups to 2nd place, sole survivors to 1st place, and recode
+    # from character strings to doubles
+  
+    mutate(finish = fct_recode(finish,
+                               `1` = "Sole Survivor",
+                               `2` = "Runner-Up",
+                               `2` = "Co-Runner-Up",
+                               `3` = "2nd Runner-Up",
+                               `4` = "4th",
+                               `5` = "5th",
+                               `6` = "6th",
+                               `7` = "7th",
+                               `8` = "8th",
+                               `9` = "9th",
+                               `10` = "10th",
+                               `11` = "11th",
+                               `12` = "12th",
+                               `13` = "13th",
+                               `14` = "14th",
+                               `15` = "15th",
+                               `16` = "16th",                                
+                               `17` = "17th",
+                               `18` = "18th",
+                               `19` = "19th",
+                               `20` = "20th"),
              
-             # Create a new column using case_when that details which number a
-             # season was based on the title of the season
+             # Create a new column using case_when that encodes for the number
+             # of a season based on the title of the season
              
              season_number = case_when(
-               season == "Borneo" ~ `1`,
-               season == "The Australian Outback" ~ `2`,
-               season == "Africa" ~ `3`,
-               season == "Marquesas" ~ `4`,
-               season == "Thailand" ~ `5`,
-               season == "The Amazon" ~ `6`,
-               season == "Pearl Island" ~ `7`,
-               season == "All-Stars" ~ `8`,
-               season == "Vanuatu" ~ `9`,
-               season == "Palau" ~ `10`,
-               season == "Guatemala" ~ `11`,
-               season == "Panama" ~ `12`,
-               season == "Cook Islands" ~ `13`,
-               season == "Fiji" ~ `14`,
-               season == "China" ~ `15`,
-               season == "Micronesia" ~ `16`,
-               season == "Gabon" ~ `17`,
-               season == "Tocantins" ~ `18`,
-               season == "Samoa" ~ `19`,
-               season == "Heroes vs. Villains" ~ `20`,
-               season == "Nicaragua" ~ `21`,
-               season == "Redemption Island" ~ `22`,
-               season == "South Pacific" ~ `23`,
-               season == "One World" ~ `24`,
-               season == "Philippines" ~ `25`,
-               season == "Caramoan" ~ `26`,
-               season == "Blood vs. Water" ~ `27`,
-               season == "Cagayan" ~ `28`,
-               season == "San Juan del Sur" ~ `29`,
-               season == "Worlds Apart" ~ `30`,
-               season == "Cambodia" ~ `31`,
-               season == "Kaôh Rong" ~ `32`,
-               season == "Millennials vs. Gen X" ~ `33`,
-               season == "Game Changers" ~ `34`,
-               season == "Heroes vs. Healers vs. Hustlers" ~ `35`,
-               season == "Ghost Island" ~ `36`,
-               season == "David vs. Goliath" ~ `37`)) %>%
+               season == "Borneo" ~ 1,
+               season == "The Australian Outback" ~ 2,
+               season == "Africa" ~ 3,
+               season == "Marquesas" ~ 4,
+               season == "Thailand" ~ 5,
+               season == "The Amazon" ~ 6,
+               season == "Pearl Island" ~ 7,
+               season == "All-Stars" ~ 8,
+               season == "Vanuatu" ~ 9,
+               season == "Palau" ~ 10,
+               season == "Guatemala" ~ 11,
+               season == "Panama" ~ 12,
+               season == "Cook Islands" ~ 13,
+               season == "Fiji" ~ 14,
+               season == "China" ~ 15,
+               season == "Micronesia" ~ 16,
+               season == "Gabon" ~ 17,
+               season == "Tocantins" ~ 18,
+               season == "Samoa" ~ 19,
+               season == "Heroes vs. Villains" ~ 20,
+               season == "Nicaragua" ~ 21,
+               season == "Redemption Island" ~ 22,
+               season == "South Pacific" ~ 23,
+               season == "One World" ~ 24,
+               season == "Philippines" ~ 25,
+               season == "Caramoan" ~ 26,
+               season == "Blood vs. Water" ~ 27,
+               season == "Cagayan" ~ 28,
+               season == "San Juan del Sur" ~ 29,
+               season == "Worlds Apart" ~ 30,
+               season == "Cambodia" ~ 31,
+               season == "Kaôh Rong" ~ 32,
+               season == "Millennials vs. Gen X" ~ 33,
+               season == "Game Changers" ~ 34,
+               season == "Heroes vs. Healers vs. Hustlers" ~ 35,
+               season == "Ghost Island" ~ 36,
+               season == "David vs. Goliath" ~ 37)
+    )
 
-  
-  
-  
-      # Unselect columns that pertain to player trivia, as they are strings of
-      # interesting facts that do not contribute to our data.
-  
-      select(-(contains("trivia"))) 
+# Fill out the rest of the data for the 37th season, David vs. Goliath, which
+# was still airing when this CSV file was created. First fill out the order in
+# which everyone finished
+
+survivor_data[667:673, 6] <- c(5, 3, 7, 6, 4, 2, 1)
+
+# Populate the data for the number of individual challenge wins, gathered from
+# the Wikipedia article for Season 37:
+# https://en.wikipedia.org/wiki/Survivor:_David_vs._Goliath. Make this a
+# numerical vector so that we can reuse it
+
+individualWins <-c(3, 3, 3, 5, 4, 6, 6)
+
+# Populate the data for the number of individualChallengeWins
+
+survivor_data[667:673, 8] <- individualWins
+
+# Populate the data for the number of totalWins by creating a numerical vector
+# of the tribalChallengewins and adding it to the number in the corresponding
+# position in the individualWins numerical vector
+
+survivor_data[667:673, 9] <- individualWins + survivor_data[667:673, 7]
+
+# Populate the number of days lasted using information from the aforementioned
+# Wiki article
+
+survivor_data[667:673, 10] <- c( 37, 39, 35, 36, 38, 39, 39)
+
+# Populate the total number of votes each player received by the end of 39 days
+# or whenever they were eliminated
+
+survivor_data[667:673, 11] <- c( 18, 6, 13, 0, 6, 1, 0)
+
+# Write as a CSV to use for the shiny App later
+
+write_csv(survivor_data, path = "survivor_data.csv")
 ```
+
+
 
 ``` {r Cool Graphic, message = FALSE, warning = FALSE}
 
