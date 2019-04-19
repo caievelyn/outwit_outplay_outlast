@@ -29,6 +29,8 @@ knitr::opts_chunk$set(echo = FALSE)
 library(tidyverse)
 library(gganimate)
 library(ggplot2)
+library(janitor)
+library(rebus)
 ```
 
 ```{r setup_x, warning = FALSE, message = FALSE}
@@ -179,12 +181,30 @@ write_csv(survivor_data, path = "survivor_data.csv")
 ```
 
 
+```{r cleanup_immunity idols, message= FALSE, error= FALSE}
+
+idols <- read_csv("idols_survivor.csv") %>%
+  clean_names() %>%
+  select(contestant, season, idols_found, idols_played)
+
+idol_regex <- START %R% "S" %R% capture(DGT %R% DGT) %R% END
+
+idols_clean <- idols %>%
+  filter(season != "S38",
+         !is.na(contestant)) %>%
+  mutate(season = str_match(season, pattern = idol_regex)[,2]) %>%
+  
+
+
+```
+
+
 
 ``` {r Cool Graphic, message = FALSE, warning = FALSE}
 
 # Create a graphic that shows the number of individual challenge wins for contestants still in the game after the "merge" versus the number of days lasted faceted by gender
 
-x %>%
+survivor_data %>%
   
   # Filter out the N/A values for individual challenge wins, which indicates that the contestant was voted out before the merge
   
