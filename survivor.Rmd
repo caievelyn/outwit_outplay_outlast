@@ -183,7 +183,7 @@ write_csv(survivor_data, path = "survivor_data.csv")
 
 ```{r cleanup_immunity idols, message= FALSE, error= FALSE}
 
-idols <- read_csv("idols_survivor.csv") %>%
+idols <- read_csv("idols_survivor_clean.csv") %>%
   clean_names() %>%
   select(contestant, season, idols_found, idols_played)
 
@@ -192,7 +192,7 @@ idol_regex <- START %R% "S" %R% capture(DGT %R% DGT) %R% END
 idols_clean <- idols %>%
   filter(season != "S38",
          !is.na(contestant)) %>%
-  mutate(season = str_match(season, pattern = idol_regex)[,2]) %>%
+  mutate(season = str_match(season, pattern = idol_regex)[,2])
   
 
 
@@ -221,6 +221,10 @@ survivor_data %>%
   # Plot out the points with a little jitter just to see the distribution (will change later since the jitter leads us to falsely believe that some lasted over forty days which is impossible).
   
   geom_histogram(show.legend =FALSE) +
+  
+  # Change the scaling for the x-axis to be easier to read
+  
+  scale_x_continuous(breaks = seq(0, 10, by = 1)) +
   
   # Add appropriate labels
   
