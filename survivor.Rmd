@@ -177,7 +177,7 @@ survivor_data[667:673, 11] <- c( 18, 6, 13, 0, 6, 1, 0)
 
 # Write as a CSV to use for the shiny App later
 
-# write_csv(survivor_data, path = "survivor_data.csv")
+write_csv(survivor_data, path = "survivor_data.csv")
 ```
 
 

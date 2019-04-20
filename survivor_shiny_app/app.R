@@ -1,6 +1,16 @@
+
 # Load the shiny library
 
 library(shiny)
+library(tidyverse)
+library(gganimate)
+library(ggplot2)
+library(janitor)
+library(rebus)
+
+# Read in the CSV file
+
+survivor_data <- read_csv("survivor_data.csv")
 
 # Define UI for application that draws a histogram based on the gender selected
 
