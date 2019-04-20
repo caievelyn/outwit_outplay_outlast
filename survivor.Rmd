@@ -193,7 +193,13 @@ idols_clean <- idols %>%
   filter(season != "S38",
          !is.na(contestant)) %>%
   mutate(season = str_match(season, pattern = idol_regex)[,2])
+
   
+idols_clean[26, 1] <- c("J.T. Thomas")
+idols_clean[81, 1] <- c("J.T. Thomas")
+
+all_data <- left_join(survivor_data, idols_clean, by = "contestant")
+
 
 
 ```
@@ -218,8 +224,6 @@ survivor_data %>%
   
   ggplot(mapping = aes(x = individualChallengeWins)) +
   
-  # Plot out the points with a little jitter just to see the distribution (will change later since the jitter leads us to falsely believe that some lasted over forty days which is impossible).
-  
   geom_histogram(show.legend =FALSE) +
   
   # Change the scaling for the x-axis to be easier to read
@@ -228,7 +232,7 @@ survivor_data %>%
   
   # Add appropriate labels
   
-  labs(title = "Individual Challenge Wins By Post-Merge Constestants In 38 Seasons of Survivor",
+  labs(title = "Individual Challenge Wins By Post-Merge Constestants In 37 Seasons of Survivor",
        subtitle = "Skewed right plots for number of individual wins show that they are rare for both genders,\n although more on the high extreme for men",
        caption = "Source: https://raw.githubusercontent.com/davekwiatkowski/survivor-data/master/player-data.json") +
   
