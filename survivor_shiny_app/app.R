@@ -1,4 +1,3 @@
-
 # Load the shiny library
 
 library(shiny)
@@ -7,6 +6,8 @@ library(gganimate)
 library(ggplot2)
 library(janitor)
 library(rebus)
+library(DT)
+library(shinythemes)
 
 # Read in the CSV file
 
@@ -16,31 +17,39 @@ survivor_data <- read_csv("survivor_data.csv")
 
 ui <- fluidPage(
   
+  theme = shinytheme("simplex"),
+  
   # Application title
   
-  titlePanel("Individual Challenge Wins By Post-Merge Constestants In 37 Seasons of Survivor"),
+  h1("Individual Challenge Wins By Post-Merge Constestants In 37 Seasons of Survivor"),
   
-  # Sidebar with a radio button input for selected gender
-  
-  sidebarLayout(
-    sidebarPanel(
-      radioButtons(inputId = "gender",
-                   choices = c("Female", "Male"),
-                   label = "Gender")
+  navbarPage("Survivor!",
+    tabPanel("Explore the Dataset",
+      sidebarLayout(
+        sidebarPanel(
+          textInput(inputId = "text", label = "What's your name?", placeholder = "Name:")
+        ),
+        mainPanel(
+          dataTableOutput("data_explorer")
+        )
+      )
     ),
-    
-    # Show a plot of the generated distribution
-    
-    mainPanel(
-      tabsetPanel(
-        tabPanel("Explore the Dataset",
-                 plotOutput("dataPlot")),
-        tabPanel("Outwit", 
-                 plotOutput("outwitPlot")),
-        tabPanel("Outplay",
-                 plotOutput("outplayPlot")),
-        tabPanel("Outlast",
-                 plotOutput("outlastPlot"))
+    tabPanel("Outwit"
+    ),
+    tabPanel("Outplay"
+    ),
+    tabPanel("Outlast",
+      sidebarLayout(
+        sidebarPanel(
+          
+          # Sidebar with a radio button input for selected gender
+          
+          radioButtons(inputId = "gender",
+                       choices = c("Female", "Male"),
+                       label = "Gender")
+        ),
+        
+        mainPanel(plotOutput("outlastPlot"))
       )
     )
   )
@@ -91,18 +100,11 @@ server <- function(input, output) {
     
   })
   
-  output$dataPlot <- renderTable({
-    
-    
-    
-    
-  }
-  )
-  
-  
+  output$data_explorer <- renderDataTable({
+    survivor_data
+  })
 }
 
 
 # Run the application 
 shinyApp(ui = ui, server = server)
-

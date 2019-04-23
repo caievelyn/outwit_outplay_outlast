@@ -187,8 +187,6 @@ all_data <- left_join(survivor_data, idols_clean,
                       by = c("contestant", "season_number"),
                       suffix = c(".x", ".y"))
 
-
-
 ```
 
 
