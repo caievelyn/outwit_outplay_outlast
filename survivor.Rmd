@@ -93,7 +93,7 @@ survivor_data <- x %>%
                season == "Marquesas" ~ 4,
                season == "Thailand" ~ 5,
                season == "The Amazon" ~ 6,
-               season == "Pearl Island" ~ 7,
+               season == "Pearl Islands" ~ 7,
                season == "All-Stars" ~ 8,
                season == "Vanuatu" ~ 9,
                season == "Palau" ~ 10,
@@ -125,6 +125,12 @@ survivor_data <- x %>%
                season == "Ghost Island" ~ 36,
                season == "David vs. Goliath" ~ 37)
     )
+
+ # Recode NA values for season (which correspond to Kaôh Rong, which has a
+ # special character and therefore was not read in correctly) as 32
+
+
+survivor_data$season_number[is.na(survivor_data$season_number)] <- 32
 
 # Fill out the rest of the data for the 37th season, David vs. Goliath, which
 # was still airing when this CSV file was created. First fill out the order in
@@ -158,10 +164,6 @@ survivor_data[667:673, 10] <- c( 37, 39, 35, 36, 38, 39, 39)
 # or whenever they were eliminated
 
 survivor_data[667:673, 11] <- c( 18, 6, 13, 0, 6, 1, 0)
-
-# Write as a CSV to use for the shiny App later
-
-write_csv(survivor_data, path = "survivor_data.csv")
 ```
 
 
@@ -175,7 +177,9 @@ idol_regex <- START %R% "S" %R% capture(DGT %R% DGT) %R% END
 
 idols_clean <- idols %>%
   filter(season != "S38",
-         !is.na(contestant)) %>%
+         !is.na(contestant),
+         !is.na(season),
+         season != "Totals") %>%
   mutate(season_number = as.numeric(str_match(season, pattern = idol_regex)[,2]))
 
   
@@ -187,41 +191,10 @@ all_data <- left_join(survivor_data, idols_clean,
                       by = c("contestant", "season_number"),
                       suffix = c(".x", ".y"))
 
-```
+all_data <- all_data %>%
+  select(-season.y, -iconPictureURL, -fullPictureURL)
 
+# Write as a CSV to use for the shiny App later
 
-
-``` {r Cool Graphic, message = FALSE, warning = FALSE}
-
-# Create a graphic that shows the number of individual challenge wins for contestants still in the game after the "merge" versus the number of days lasted faceted by gender
-
-survivor_data %>%
-  
-  # Filter out the N/A values for individual challenge wins, which indicates that the contestant was voted out before the merge
-  
-  filter(individualChallengeWins != "N/A",
-         
-         # Filter out those who lasted less than two weeks, or 14 days. Since the merge is usually the mid-way point and contain around a dozen remaining contestants, it varies season to season, but the merge has never occurred prior to the two week mark.
-         
-         daysLasted > 14) %>%
-  
-  # Create a ggplot, with the x-axis as the number of individual challenge wins, and the y-axis as the number of days lasted
-  
-  ggplot(mapping = aes(x = individualChallengeWins)) +
-  
-  geom_histogram(show.legend =FALSE) +
-  
-  # Change the scaling for the x-axis to be easier to read
-  
-  scale_x_continuous(breaks = seq(0, 10, by = 1)) +
-  
-  # Add appropriate labels
-  
-  labs(title = "Individual Challenge Wins By Post-Merge Constestants In 37 Seasons of Survivor",
-       subtitle = "Skewed right plots for number of individual wins show that they are rare for both genders,\n although more on the high extreme for men",
-       caption = "Source: https://raw.githubusercontent.com/davekwiatkowski/survivor-data/master/player-data.json") +
-  
-  # Facet by gender to see if there are any signficant discrepanices
-  
-  facet_grid(~gender)
+write_csv(all_data, "survivor_data.csv")
 ```

@@ -27,7 +27,12 @@ ui <- fluidPage(
     tabPanel("Explore the Dataset",
       sidebarLayout(
         sidebarPanel(
-          textInput(inputId = "text", label = "What's your name?", placeholder = "Name:")
+          selectInput(inputId = "select_season",
+                      label = "Choose a season to display:",
+                      choices = levels(survivor_data$)
+                      
+            
+          )
         ),
         mainPanel(
           dataTableOutput("data_explorer")
