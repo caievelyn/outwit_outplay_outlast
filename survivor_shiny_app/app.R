@@ -32,7 +32,16 @@ ui <- fluidPage(
     # Show a plot of the generated distribution
     
     mainPanel(
-      plotOutput("plot")
+      tabsetPanel(
+        tabPanel("Explore the Dataset",
+                 plotOutput("dataPlot")),
+        tabPanel("Outwit", 
+                 plotOutput("outwitPlot")),
+        tabPanel("Outplay",
+                 plotOutput("outplayPlot")),
+        tabPanel("Outlast",
+                 plotOutput("outlastPlot"))
+      )
     )
   )
 )
@@ -43,7 +52,7 @@ server <- function(input, output) {
   
   # Render a plot for the output
   
-  output$plot <- renderPlot ({
+  output$outlastPlot <- renderPlot ({
     
     data <- subset(survivor_data,
                    
@@ -81,6 +90,16 @@ server <- function(input, output) {
     p
     
   })
+  
+  output$dataPlot <- renderTable({
+    
+    
+    
+    
+  }
+  )
+  
+  
 }
 
 
