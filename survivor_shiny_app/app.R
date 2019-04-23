@@ -13,6 +13,8 @@ library(shinythemes)
 
 survivor_data <- read_csv("survivor_data.csv")
 
+survivor_data$season.x <- as.factor(survivor_data$season.x)
+
 # Define UI for application that draws a histogram based on the gender selected
 
 ui <- fluidPage(
@@ -29,9 +31,8 @@ ui <- fluidPage(
         sidebarPanel(
           selectInput(inputId = "select_season",
                       label = "Choose a season to display:",
-                      choices = levels(survivor_data$)
-                      
-            
+                      choices = levels(survivor_data$season.x),
+                      multiple = TRUE
           )
         ),
         mainPanel(
@@ -106,7 +107,11 @@ server <- function(input, output) {
   })
   
   output$data_explorer <- renderDataTable({
-    survivor_data
+    
+    data <- subset(survivor_data,
+                   season.x == input$select_season)
+    
+    data
   })
 }
 
