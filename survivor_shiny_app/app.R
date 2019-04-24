@@ -13,24 +13,24 @@ library(shinythemes)
 
 survivor_data <- read_csv("survivor_data.csv")
 
-colnames(survivor_data) <- c("Contestant",
-                             "Age",
-                             "City",
-                             "State",
-                             "Season",
-                             "Finish",
-                             "Tribal Challenge Wins", 
-                             "Individual Challenge Wins",
-                             "Total Wins",
-                             "Days Lasted",
-                             "Votes Against",
-                             "Gender",
-                             "Occupation",
-                             "Season Number",
-                             "Idols Found",
-                             "Idols Played")
+# colnames(survivor_data) <- c("Contestant",
+#                              "Age",
+#                              "City",
+#                              "State",
+#                              "Season",
+#                              "Finish",
+#                              "Tribal Challenge Wins", 
+#                              "Individual Challenge Wins",
+#                              "Total Wins",
+#                              "Days Lasted",
+#                              "Votes Against",
+#                              "Gender",
+#                              "Occupation",
+#                              "Season Number",
+#                              "Idols Found",
+#                              "Idols Played")
 
-survivor_data$Season <- as.factor(survivor_data$Season)
+survivor_data$season.x <- as.factor(survivor_data$season.x)
 
 # Define UI for application that draws a histogram based on the gender selected
 
@@ -48,15 +48,27 @@ ui <- fluidPage(
         sidebarPanel(
           selectInput(inputId = "select_season",
                       label = "Choose a season to display:",
-                      choices = c("All", levels(survivor_data$Season)),
-                      multiple = TRUE
-          ),
+                      choices = c("All", levels(survivor_data$season.x)),
+                      multiple = TRUE),
           sliderInput(inputId = "age_slider",
                       label = "Age",
-                      min = min(survivor_data$Age),
-                      max = max(survivor_data$Age),
+                      min = min(survivor_data$age),
+                      max = max(survivor_data$age),
                       step = 1,
-                      value = c(min(survivor_data$Age), max(survivor_data$Age))),
+                      value = c(min(survivor_data$age), max(survivor_data$age))),
+          checkboxGroupInput(inputId = "gender_check",
+                           label = "Gender",
+                           choices = c("Male", "Female"),
+                           selected = c("Male", "Female")),
+          sliderInput(inputId = "days_slider",
+                    label = "Days Lasted",
+                    min = min(survivor_data$daysLasted),
+                    max = max(survivor_data$daysLasted),
+                    step = 1,
+                    value = c(min(survivor_data$daysLasted), max(survivor_data$daysLasted))),
+          radioButtons(inputId = "winner",
+                     label = "Finish Place",
+                     choices = c("All", "Sole Survivor")),
           submitButton(text = "Display")
         ),
         mainPanel(
@@ -136,12 +148,21 @@ server <- function(input, output) {
     req(input$select_season)
     data <- survivor_data
     data <- subset(data,
-                   Age >= input$age_slider[1] &
-                   Age <= input$age_slider[2])
-      if (input$select_season != "All") {
-          data <- subset(survivor_data,
-                         Season == input$select_season)
-      }
+                   age >= input$age_slider[1] &
+                   age <= input$age_slider[2] &
+                   daysLasted >= input$days_slider[1] &
+                   daysLasted <= input$days_slider[2])
+    if (input$select_season != "All") {
+      data <- subset(data, season.x == input$select_season)
+    }
+    
+    if (input$winner == "Sole Survivor") {
+      data <- subset(data, finish == 1)
+    }
+    
+    if (length(input$gender_check) == 1) {
+      data <- subset(data, gender == input$gender_check)
+    }
       data
   })
 }
