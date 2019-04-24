@@ -13,7 +13,24 @@ library(shinythemes)
 
 survivor_data <- read_csv("survivor_data.csv")
 
-survivor_data$season.x <- as.factor(survivor_data$season.x)
+colnames(survivor_data) <- c("Contestant",
+                             "Age",
+                             "City",
+                             "State",
+                             "Season",
+                             "Finish",
+                             "Tribal Challenge Wins", 
+                             "Individual Challenge Wins",
+                             "Total Wins",
+                             "Days Lasted",
+                             "Votes Against",
+                             "Gender",
+                             "Occupation",
+                             "Season Number",
+                             "Idols Found",
+                             "Idols Played")
+
+survivor_data$Season <- as.factor(survivor_data$Season)
 
 # Define UI for application that draws a histogram based on the gender selected
 
@@ -31,9 +48,16 @@ ui <- fluidPage(
         sidebarPanel(
           selectInput(inputId = "select_season",
                       label = "Choose a season to display:",
-                      choices = levels(survivor_data$season.x),
+                      choices = c("All", levels(survivor_data$Season)),
                       multiple = TRUE
-          )
+          ),
+          sliderInput(inputId = "age_slider",
+                      label = "Age",
+                      min = min(survivor_data$Age),
+                      max = max(survivor_data$Age),
+                      step = 1,
+                      value = c(min(survivor_data$Age), max(survivor_data$Age))),
+          submitButton(text = "Display")
         ),
         mainPanel(
           dataTableOutput("data_explorer")
@@ -106,12 +130,19 @@ server <- function(input, output) {
     
   })
   
+  
+  
   output$data_explorer <- renderDataTable({
-    
-    data <- subset(survivor_data,
-                   season.x == input$select_season)
-    
-    data
+    req(input$select_season)
+    data <- survivor_data
+    data <- subset(data,
+                   Age >= input$age_slider[1] &
+                   Age <= input$age_slider[2])
+      if (input$select_season != "All") {
+          data <- subset(survivor_data,
+                         Season == input$select_season)
+      }
+      data
   })
 }
 
