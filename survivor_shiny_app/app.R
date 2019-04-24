@@ -88,7 +88,8 @@ ui <- fluidPage(
           
           radioButtons(inputId = "gender",
                        choices = c("Female", "Male"),
-                       label = "Gender")
+                       label = "Gender"),
+          submitButton(text = "Display")
         ),
         
         mainPanel(plotOutput("outlastPlot"))
@@ -101,11 +102,37 @@ ui <- fluidPage(
 
 server <- function(input, output) {
   
-  # Render a plot for the output
+  
+  
+  output$data_explorer <- renderDataTable({
+    req(input$select_season)
+    data <- survivor_data
+    data <- subset(data,
+                   age >= input$age_slider[1] &
+                   age <= input$age_slider[2] &
+                   daysLasted >= input$days_slider[1] &
+                   daysLasted <= input$days_slider[2])
+    if (input$select_season != "All") {
+      data <- subset(data, season.x == input$select_season)
+    }
+    
+    if (input$winner == "Sole Survivor") {
+      data <- subset(data, finish == 1)
+    }
+    
+    if (length(input$gender_check) == 1) {
+      data <- subset(data, gender == input$gender_check)
+    }
+    
+      data
+  })
+  
   
   output$outlastPlot <- renderPlot ({
     
-    data <- subset(survivor_data,
+    data <- survivor_data
+    
+    data <- subset(data,
                    
                    # Filter out the N/A values for individual challenge wins,
                    # which indicates that the contestant was voted out before
@@ -140,30 +167,6 @@ server <- function(input, output) {
     # Call the ggplot object
     p
     
-  })
-  
-  
-  
-  output$data_explorer <- renderDataTable({
-    req(input$select_season)
-    data <- survivor_data
-    data <- subset(data,
-                   age >= input$age_slider[1] &
-                   age <= input$age_slider[2] &
-                   daysLasted >= input$days_slider[1] &
-                   daysLasted <= input$days_slider[2])
-    if (input$select_season != "All") {
-      data <- subset(data, season.x == input$select_season)
-    }
-    
-    if (input$winner == "Sole Survivor") {
-      data <- subset(data, finish == 1)
-    }
-    
-    if (length(input$gender_check) == 1) {
-      data <- subset(data, gender == input$gender_check)
-    }
-      data
   })
 }
 
