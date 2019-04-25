@@ -153,7 +153,7 @@ ui <- fluidPage(
     
     # Create a tab in the navbar for the Outwit portion
     
-    tabPanel("Outwit: Idols",
+    tabPanel("Outwit: Idol Play",
       mainPanel(
         tabsetPanel(type = "tabs",
                     tabPanel("Outwit Text", textOutput("outwit_text")),
@@ -161,7 +161,7 @@ ui <- fluidPage(
     
     # Create a tab in the navbar for the outplay portion
     
-    tabPanel("Outplay: Immunity and Challenges",
+    tabPanel("Outplay: Immunity & Challenges",
       mainPanel(
         tabsetPanel(type = "tabs",
                     tabPanel("Outplay Text", textOutput("outplay_text")),
@@ -169,34 +169,22 @@ ui <- fluidPage(
     
     # Create a tab in the navbar for the outlast portion
     
-    tabPanel("Outlast: High Level Trends",
-             mainPanel(
-               tabsetPanel(type = "tabs",
-                           tabPanel("Outlast Text", textOutput("outlast_text")),
-                           tabPanel("Outlast", dataTableOutput("Outlast")))),
-      sidebarLayout(
-        sidebarPanel(
-          
-          # Create radio buttons in the side bar that allow the user to select
-          # for female or male contestants
-          
-          radioButtons(inputId = "gender",
-                       choices = c("Female", "Male"),
-                       label = "Gender"),
-          br(),
-          
-          # Create a submit button
-          
-          submitButton(text = "Display")
-        ),
+    tabPanel("Outlast: Sole Survivor & Trends",
+             
         
         # Output a plot
         
-        mainPanel(plotOutput("outlastPlot"))
+        mainPanel(
+          tabsetPanel(type = "tabs",
+                      tabPanel("Sole Survivor Analysis", plotOutput("winnergenderPlot")),
+                      tabPanel("Outlast", plotOutput("outlastPlot"),
+                               br()
+                               )
+                      )
+          )
+        )
       )
     )
-  )
-)
 
 # Define server logic required to draw a histogram
 
@@ -259,6 +247,20 @@ server <- function(input, output) {
       data
   })
   
+  output$winnergenderPlot <- renderPlot ({
+    
+    data <- survivor_data
+    
+    data <- subset(data,
+                   finish == 1)
+    
+    p <- ggplot(data, mapping = aes(x = gender, fill = gender)) +
+         geom_bar(width = .3) +
+         theme_minimal()
+    p
+    
+  })
+  
   
   output$outlastPlot <- renderPlot ({
     
@@ -278,11 +280,7 @@ server <- function(input, output) {
                      # season to season, but the merge has never occurred prior
                      # to the two week mark.
                      
-                     daysLasted > 14 &
-                     
-                     # Filter only for the selected gender
-                     
-                     gender == input$gender)
+                     daysLasted > 14)
     
     # Create the ggplot object that will hold the actual histogram
     
@@ -294,7 +292,11 @@ server <- function(input, output) {
       scale_x_continuous(breaks = seq(0, 10, by = 1)) +
       labs(title = "Individual Challenge Wins By Post-Merge Constestants In 37 Seasons of Survivor",
            subtitle = "Skewed right plots for number of individual wins show that they are rare for both genders,\n although more on the high extreme for men",
-           caption = "Source: https://raw.githubusercontent.com/davekwiatkowski/survivor-data/master/player-data.json")
+           caption = "Source: https://raw.githubusercontent.com/davekwiatkowski/survivor-data/master/player-data.json") +
+      
+      # Facet by gender
+      
+      facet_grid(~gender)
     
     # Call the ggplot object
     p
