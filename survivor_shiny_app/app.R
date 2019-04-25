@@ -8,6 +8,7 @@ library(janitor)
 library(rebus)
 library(DT)
 library(shinythemes)
+library(shinyWidgets)
 
 # Read in the CSV file
 
@@ -49,6 +50,10 @@ ui <- fluidPage(
   # Change theme using shinytheme library to 'simplex'
   
   theme = shinytheme("simplex"),
+  
+  # Change the background image to Survivor
+  
+  setBackgroundImage(src = "https://www.hardwoodandhollywood.com/wp-content/uploads/2017/03/Survivor-1.jpg"),
   
   # Application title
   
