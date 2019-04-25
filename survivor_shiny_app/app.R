@@ -32,6 +32,10 @@ survivor_data <- read_csv("survivor_data.csv")
 
 survivor_data$season.x <- as.factor(survivor_data$season.x)
 
+survivor_data$idols_found[is.na(survivor_data$idols_found)] <- 0
+
+survivor_data$idols_played[is.na(survivor_data$idols_played)] <- 0
+
 # Define UI for application that draws a histogram based on the gender selected
 
 ui <- fluidPage(
@@ -66,6 +70,12 @@ ui <- fluidPage(
                     max = max(survivor_data$daysLasted),
                     step = 1,
                     value = c(min(survivor_data$daysLasted), max(survivor_data$daysLasted))),
+          sliderInput(inputId = "idols_slider",
+                      label = "Idols Played",
+                      min = 0,
+                      max = max(survivor_data$idols_played),
+                      step = 1,
+                      value = c(0, max(survivor_data$idols_played))),
           radioButtons(inputId = "winner",
                      label = "Finish Place",
                      choices = c("All", "Sole Survivor")),
@@ -111,7 +121,9 @@ server <- function(input, output) {
                    age >= input$age_slider[1] &
                    age <= input$age_slider[2] &
                    daysLasted >= input$days_slider[1] &
-                   daysLasted <= input$days_slider[2])
+                   daysLasted <= input$days_slider[2] &
+                   idols_played >= input$idols_slider[1] &
+                   idols_played <= input$idols_slider[2])
     if (input$select_season != "All") {
       data <- subset(data, season.x == input$select_season)
     }
