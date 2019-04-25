@@ -1,4 +1,4 @@
-# Load the shiny library
+# Load the appropriate libraries
 
 library(shiny)
 library(tidyverse)
@@ -30,61 +30,117 @@ survivor_data <- read_csv("survivor_data.csv")
 #                              "Idols Found",
 #                              "Idols Played")
 
+# Change the season column to a factor
+
 survivor_data$season.x <- as.factor(survivor_data$season.x)
+
+# Change the NA values created through the join in the idols_found column to 0
 
 survivor_data$idols_found[is.na(survivor_data$idols_found)] <- 0
 
+# Change the NA values created through the join in the idols_played column to 0
+
 survivor_data$idols_played[is.na(survivor_data$idols_played)] <- 0
 
-# Define UI for application that draws a histogram based on the gender selected
+# Define UI for application
 
 ui <- fluidPage(
+  
+  # Change theme using shinytheme library to 'simplex'
   
   theme = shinytheme("simplex"),
   
   # Application title
   
-  h1("Survivor: Outwit, Outplay, Outlast"),
+  h1(" Survivor: Outwit, Outplay, Outlast"),
+  
+  # Add a caption detailing what the project is for
+  
+  h4("by Evelyn Cai, for Gov 1005, a data course at Harvard University", style = "color:red"),
+  
+  # Create the navigation bar
   
   navbarPage("Survivor!",
-    tabPanel("Explore the Dataset",
-      sidebarLayout(
-        sidebarPanel(
-          selectInput(inputId = "select_season",
-                      label = "Choose a season to display:",
-                      choices = c("All", levels(survivor_data$season.x)),
-                      multiple = TRUE),
-          sliderInput(inputId = "age_slider",
-                      label = "Age",
-                      min = min(survivor_data$age),
-                      max = max(survivor_data$age),
-                      step = 1,
-                      value = c(min(survivor_data$age), max(survivor_data$age))),
-          br(),
-          sliderInput(inputId = "days_slider",
-                    label = "Days Lasted",
-                    min = min(survivor_data$daysLasted),
-                    max = max(survivor_data$daysLasted),
-                    step = 1,
-                    value = c(min(survivor_data$daysLasted), max(survivor_data$daysLasted))),
-          br(),
-          sliderInput(inputId = "idols_slider",
-                      label = "Idols Played",
-                      min = 0,
-                      max = max(survivor_data$idols_played),
-                      step = 1,
-                      value = c(0, max(survivor_data$idols_played))),
-          br(),
-          checkboxGroupInput(inputId = "gender_check",
-                             label = "Gender",
-                             choices = c("Male", "Female"),
-                             selected = c("Male", "Female")),
-          br(),
-          radioButtons(inputId = "winner",
-                     label = "Finish Place",
-                     choices = c("All", "Sole Survivor")),
-          br(),
-          submitButton(text = "Display")
+             
+             # Create the dataset explorer tab. This wil render a data table, so
+             # add a sidebar layout with various different functionalities to
+             # filter the dataset.
+             
+             tabPanel("Explore the Dataset",
+                      sidebarLayout(
+                        sidebarPanel(
+                          
+                          # Create a selectInput for the user to select a
+                          # specific season(s), or all the seasons. Multiple =
+                          # TRUE so users can select more than one season.
+                          
+                          selectInput(inputId = "select_season",
+                          label = "Choose a season to display:",
+                          choices = c("All", levels(survivor_data$season.x)),
+                          multiple = TRUE),
+                          
+                          # Create a two-sided range slider to adjust for age,
+                          # stepping by 1. Set the default to the whole range,
+                          # using the min() and max() function
+                          
+                      sliderInput(inputId = "age_slider",
+                                  label = "Age",
+                                  min = min(survivor_data$age),
+                                  max = max(survivor_data$age),
+                                  step = 1,
+                                  value = c(min(survivor_data$age), max(survivor_data$age))),
+                      br(),
+                      
+                      # Create a two-sided range slider for numbers of days
+                      # lasted, stepping by 1 and setting the default value to
+                      # the whole range as well.
+                      
+                      sliderInput(inputId = "days_slider",
+                                label = "Days Lasted",
+                                min = min(survivor_data$daysLasted),
+                                max = max(survivor_data$daysLasted),
+                                step = 1,
+                                value = c(min(survivor_data$daysLasted), max(survivor_data$daysLasted))),
+                      br(),
+                      
+                      # Create a two-ranged slider for number of idols played,
+                      # with the minimum at 0 and the max at the max() of
+                      # idols_played, which is 3. Step by 1 because the range is
+                      # quite small, and set the default value to the whole
+                      # range.
+                      
+                      sliderInput(inputId = "idols_slider",
+                                  label = "Idols Played",
+                                  min = 0,
+                                  max = max(survivor_data$idols_played),
+                                  step = 1,
+                                  value = c(0, max(survivor_data$idols_played))),
+                      br(),
+                      
+                      # Create a checkboxgroup input so more than one box can be
+                      # checked off for filtering by gender. The default is that
+                      # both are selected (which represents the whole dataset)
+                      
+                      checkboxGroupInput(inputId = "gender_check",
+                                         label = "Gender",
+                                         choices = c("Male", "Female"),
+                                         selected = c("Male", "Female")),
+                      br(),
+                      
+                      # Add two radio buttons that allow the user to select for
+                      # either the Sole Survivor of each season, or all the
+                      # contestants
+                      
+                      radioButtons(inputId = "winner",
+                                 label = "Finish Place",
+                                 choices = c("All", "Sole Survivor")),
+                      br(),
+                      
+                      # Add a submit button, so that the data will not display
+                      # unless clicked. This way we can avoid reptitive req()
+                      # functions in the server end.
+                      
+                      submitButton(text = "Display")
         ),
         mainPanel(
           tabsetPanel(type = "tabs",
@@ -94,24 +150,47 @@ ui <- fluidPage(
         )
       )
     ),
+    
+    # Create a tab in the navbar for the Outwit portion
+    
     tabPanel("Outwit: Idols",
       mainPanel(
         tabsetPanel(type = "tabs",
                     tabPanel("About", textOutput("blurb")),
                     tabPanel("Data Explorer", dataTableOutput("data_explorer"))))),
-    tabPanel("Outplay: Immunity and Challenges"),
+    
+    # Create a tab in the navbar for the outplay portion
+    
+    tabPanel("Outplay: Immunity and Challenges",
+      mainPanel(
+        tabsetPanel(type = "tabs",
+                    tabPanel("About", textOutput("blurb")),
+                    tabPanel("Data Explorer", dataTableOutput("data_explorer"))))),
+    
+    # Create a tab in the navbar for the outlast portion
+    
     tabPanel("Outlast: High Level Trends",
+             mainPanel(
+               tabsetPanel(type = "tabs",
+                           tabPanel("About", textOutput("blurb")),
+                           tabPanel("Data Explorer", dataTableOutput("data_explorer")))),
       sidebarLayout(
         sidebarPanel(
           
-          # Sidebar with a radio button input for selected gender
+          # Create radio buttons in the side bar that allow the user to select
+          # for female or male contestants
           
           radioButtons(inputId = "gender",
                        choices = c("Female", "Male"),
                        label = "Gender"),
           br(),
+          
+          # Create a submit button
+          
           submitButton(text = "Display")
         ),
+        
+        # Output a plot
         
         mainPanel(plotOutput("outlastPlot"))
       )
@@ -122,6 +201,10 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 
 server <- function(input, output) {
+  
+  # Create the blurb that introduces what Survivor is, why it's so interesting
+  # to analyze, and the two datasets that I utilized, as well as a brief intro
+  # to the gov 1005 course.
   
   output$blurb <- renderText({
     "hello this is Survivor!"
