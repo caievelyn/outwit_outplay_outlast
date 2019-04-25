@@ -161,7 +161,8 @@ ui <- fluidPage(
               tabsetPanel(type = "tabs",
                   tabPanel("Winner Analysis",
                            plotOutput("winnerPlot"),
-                           plotOutput("agePlot")),
+                           plotOutput("agePlot"),
+                           plotOutput("winnertotalPlot")),
                   tabPanel("High-Level Trends",
                            plotOutput("outlastPlot"))),
               width = 12
@@ -315,7 +316,19 @@ server <- function(input, output) {
         
         p
     
-  })
+    })
+    
+    
+    output$winnertotalPlot <- renderPlot({
+      data <- subset(survivor_data,
+                     finish == 1)
+      p <- ggplot(data, aes(x = totalWins)) +
+                  geom_bar() +
+                  theme_minimal()
+      
+      p
+      
+    })
   
   
     output$outlastPlot <- renderPlot ({
@@ -359,7 +372,7 @@ server <- function(input, output) {
         
         p
     
-  })
+    })
 }
 
 
