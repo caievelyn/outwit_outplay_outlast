@@ -44,7 +44,7 @@ ui <- fluidPage(
   
   # Application title
   
-  h1("Individual Challenge Wins By Post-Merge Constestants In 37 Seasons of Survivor"),
+  h1("Survivor: Outwit, Outplay, Outlast"),
   
   navbarPage("Survivor!",
     tabPanel("Explore the Dataset",
@@ -60,37 +60,47 @@ ui <- fluidPage(
                       max = max(survivor_data$age),
                       step = 1,
                       value = c(min(survivor_data$age), max(survivor_data$age))),
-          checkboxGroupInput(inputId = "gender_check",
-                           label = "Gender",
-                           choices = c("Male", "Female"),
-                           selected = c("Male", "Female")),
+          br(),
           sliderInput(inputId = "days_slider",
                     label = "Days Lasted",
                     min = min(survivor_data$daysLasted),
                     max = max(survivor_data$daysLasted),
                     step = 1,
                     value = c(min(survivor_data$daysLasted), max(survivor_data$daysLasted))),
+          br(),
           sliderInput(inputId = "idols_slider",
                       label = "Idols Played",
                       min = 0,
                       max = max(survivor_data$idols_played),
                       step = 1,
                       value = c(0, max(survivor_data$idols_played))),
+          br(),
+          checkboxGroupInput(inputId = "gender_check",
+                             label = "Gender",
+                             choices = c("Male", "Female"),
+                             selected = c("Male", "Female")),
+          br(),
           radioButtons(inputId = "winner",
                      label = "Finish Place",
                      choices = c("All", "Sole Survivor")),
+          br(),
           submitButton(text = "Display")
         ),
         mainPanel(
-          dataTableOutput("data_explorer")
+          tabsetPanel(type = "tabs",
+                      tabPanel("About", textOutput("blurb")),
+                      tabPanel("Data Explorer", dataTableOutput("data_explorer"))
+          )
         )
       )
     ),
-    tabPanel("Outwit"
-    ),
-    tabPanel("Outplay"
-    ),
-    tabPanel("Outlast",
+    tabPanel("Outwit: Idols",
+      mainPanel(
+        tabsetPanel(type = "tabs",
+                    tabPanel("About", textOutput("blurb")),
+                    tabPanel("Data Explorer", dataTableOutput("data_explorer"))))),
+    tabPanel("Outplay: Immunity and Challenges"),
+    tabPanel("Outlast: High Level Trends",
       sidebarLayout(
         sidebarPanel(
           
@@ -99,6 +109,7 @@ ui <- fluidPage(
           radioButtons(inputId = "gender",
                        choices = c("Female", "Male"),
                        label = "Gender"),
+          br(),
           submitButton(text = "Display")
         ),
         
@@ -112,7 +123,9 @@ ui <- fluidPage(
 
 server <- function(input, output) {
   
-  
+  output$blurb <- renderText({
+    "hello this is Survivor!"
+  })
   
   output$data_explorer <- renderDataTable({
     req(input$select_season)
