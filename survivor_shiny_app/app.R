@@ -10,7 +10,7 @@ library(DT)
 library(shinythemes)
 library(shinyWidgets)
 
-# Read in the CSV file
+# Read in the rds file
 
 survivor_data <- read_rds("survivor_data.rds")
 
@@ -38,318 +38,326 @@ ui <- fluidPage(
   
   navbarPage("Survivor!",
              
-             # Create the dataset explorer tab. This wil render a data table, so
-             # add a sidebar layout with various different functionalities to
-             # filter the dataset.
+      # Create the dataset explorer tab. This wil render a data table, so add a
+      # sidebar layout with various different functionalities to filter the
+      # dataset.
              
-             tabPanel("Explore the Dataset",
-                      sidebarLayout(
-                        sidebarPanel(
+      tabPanel("Explore the Dataset",
+          sidebarLayout(
+              sidebarPanel(
                           
-                          # Create a selectInput for the user to select a
-                          # specific season(s), or all the seasons. Multiple =
-                          # TRUE so users can select more than one season.
+                  # Create a selectInput for the user to select a specific
+                  # season(s), or all the seasons. Multiple = TRUE so users can
+                  # select more than one season.
                           
-                          selectInput(inputId = "select_season",
-                          label = "Choose a season to display:",
-                          choices = c("All", levels(survivor_data$season.x)),
-                          multiple = TRUE),
+                  selectInput(inputId = "select_season",
+                              label = "Choose a season to display:",
+                              choices = c("All", levels(survivor_data$season.x)),
+                              multiple = TRUE),
                           
-                          # Create a two-sided range slider to adjust for age,
-                          # stepping by 1. Set the default to the whole range,
-                          # using the min() and max() function
+                  # Create a two-sided range slider to adjust for age, stepping
+                  # by 1. Set the default to the whole range, using the min()
+                  # and max() function
                           
-                      sliderInput(inputId = "age_slider",
-                                  label = "Age",
-                                  min = min(survivor_data$age),
-                                  max = max(survivor_data$age),
-                                  step = 1,
-                                  value = c(min(survivor_data$age), max(survivor_data$age))),
-                      br(),
+                  sliderInput(inputId = "age_slider",
+                              label = "Age",
+                              min = min(survivor_data$age),
+                              max = max(survivor_data$age),
+                              step = 1,
+                              value = c(min(survivor_data$age), max(survivor_data$age))),
+                  br(),
                       
-                      # Create a two-sided range slider for numbers of days
-                      # lasted, stepping by 1 and setting the default value to
-                      # the whole range as well.
+                  # Create a two-sided range slider for numbers of days lasted,
+                  # stepping by 1 and setting the default value to the whole
+                  # range as well.
+                  
+                  sliderInput(inputId = "days_slider",
+                              label = "Days Lasted",
+                              min = min(survivor_data$daysLasted),
+                              max = max(survivor_data$daysLasted),
+                              step = 1,
+                              value = c(min(survivor_data$daysLasted), max(survivor_data$daysLasted))),
+                  br(),
+                  
+                  # Create a two-ranged slider for number of idols played, with
+                  # the minimum at 0 and the max at the max() of idols_played,
+                  # which is 3. Step by 1 because the range is quite small, and
+                  # set the default value to the whole range.
+                  
+                  sliderInput(inputId = "idols_slider",
+                              label = "Idols Played",
+                              min = 0,
+                              max = max(survivor_data$idols_played),
+                              step = 1,
+                              value = c(0, max(survivor_data$idols_played))),
+                  br(),
                       
-                      sliderInput(inputId = "days_slider",
-                                label = "Days Lasted",
-                                min = min(survivor_data$daysLasted),
-                                max = max(survivor_data$daysLasted),
-                                step = 1,
-                                value = c(min(survivor_data$daysLasted), max(survivor_data$daysLasted))),
-                      br(),
-                      
-                      # Create a two-ranged slider for number of idols played,
-                      # with the minimum at 0 and the max at the max() of
-                      # idols_played, which is 3. Step by 1 because the range is
-                      # quite small, and set the default value to the whole
-                      # range.
-                      
-                      sliderInput(inputId = "idols_slider",
-                                  label = "Idols Played",
-                                  min = 0,
-                                  max = max(survivor_data$idols_played),
-                                  step = 1,
-                                  value = c(0, max(survivor_data$idols_played))),
-                      br(),
-                      
-                      # Create a checkboxgroup input so more than one box can be
-                      # checked off for filtering by gender. The default is that
-                      # both are selected (which represents the whole dataset)
-                      
-                      checkboxGroupInput(inputId = "gender_check",
-                                         label = "Gender",
-                                         choices = c("Male", "Female"),
-                                         selected = c("Male", "Female")),
-                      br(),
-                      
-                      # Add two radio buttons that allow the user to select for
-                      # either the Sole Survivor of each season, or all the
-                      # contestants
-                      
-                      radioButtons(inputId = "winner",
-                                 label = "Finish Place",
-                                 choices = c("All", "Sole Survivor")),
-                      br(),
-                      
-                      # Add a submit button, so that the data will not display
-                      # unless clicked. This way we can avoid reptitive req()
-                      # functions in the server end.
-                      
-                      submitButton(text = "Display")
-        ),
-        mainPanel(
-          tabsetPanel(type = "tabs",
-                      tabPanel("About", textOutput("blurb"), style = "color:white"),
+                  # Create a checkboxgroup input so more than one box can be
+                  # checked off for filtering by gender. The default is that
+                  # both are selected (which represents the whole dataset)
+                  
+                  checkboxGroupInput(inputId = "gender_check",
+                                     label = "Gender",
+                                     choices = c("Male", "Female"),
+                                     selected = c("Male", "Female")),
+                  br(),
+                  
+                  # Add two radio buttons that allow the user to select for
+                  # either the Sole Survivor of each season, or all the
+                  # contestants
+                  
+                  radioButtons(inputId = "winner",
+                               label = "Finish Place",
+                               choices = c("All", "Sole Survivor")),
+                  br(),
+                  
+                  # Add a submit button, so that the data will not display
+                  # unless clicked. This way we can avoid reptitive req()
+                  # functions in the server end.
+                  
+                  submitButton(text = "Display")
+                  ),
+              
+          # Define the main panel UI    
+              
+          mainPanel(
+              tabsetPanel(type = "tabs",
+                  tabPanel("About", textOutput("blurb"), style = "color:white"),
                       tabPanel("Data Explorer", dataTableOutput("data_explorer"))
+                  )
+              )
           )
-        )
-      )
-    ),
+          ),
     
-    # Create a tab in the navbar for the Outwit portion
+      # Create a tab in the navbar for the Outwit portion
     
-    tabPanel("Outwit: Idol Play",
-      mainPanel(
-        tabsetPanel(type = "tabs",
-                    tabPanel("Outwit Text", textOutput("outwit_text")),
-                    tabPanel("Outwit", dataTableOutput("outwit"))))),
+      tabPanel("Outwit: Idol Play",
+          mainPanel(
+              tabsetPanel(type = "tabs",
+                  tabPanel("Outwit Text", textOutput("outwit_text")),
+                      tabPanel("Outwit", dataTableOutput("outwit"))
+                  )
+              )
+          ),
     
-    # Create a tab in the navbar for the outplay portion
+      # Create a tab in the navbar for the outplay portion
     
-    tabPanel("Outplay: Immunity & Challenges",
-      mainPanel(
-        tabsetPanel(type = "tabs",
-                    tabPanel("Outplay Text", textOutput("outplay_text")),
-                    tabPanel("Outplay", dataTableOutput("outplay"))))),
+      tabPanel("Outplay: Immunity & Challenges",
+          mainPanel(
+              tabsetPanel(type = "tabs",
+                  tabPanel("Outplay Text", textOutput("outplay_text")),
+                      tabPanel("Outplay", dataTableOutput("outplay"))
+                  )
+              )
+          ),
     
-    # Create a tab in the navbar for the outlast portion
+      # Create a tab in the navbar for the outlast portion
     
-    tabPanel("Outlast: Sole Survivor & Trends",
+      tabPanel("Outlast: Sole Survivor & Trends",
              
+          # Output a plot
         
-        # Output a plot
-        
-        mainPanel(
-          tabsetPanel(type = "tabs",
-                      tabPanel("Winner Analysis",
-                               plotOutput("winnerPlot"),
-                               plotOutput("agePlot")),
-                      tabPanel("High-Level Trends", plotOutput("outlastPlot"))
-                      ),
-          width = 12
+          mainPanel(
+              tabsetPanel(type = "tabs",
+                  tabPanel("Winner Analysis",
+                           plotOutput("winnerPlot"),
+                           plotOutput("agePlot")),
+                  tabPanel("High-Level Trends",
+                           plotOutput("outlastPlot"))),
+              width = 12
+              )
           )
-        )
       )
-    )
+  )
 
 # Define server logic required to draw a histogram
 
 server <- function(input, output) {
   
-  # Create the blurb that introduces what Survivor is, why it's so interesting
-  # to analyze, and the two datasets that I utilized, as well as a brief intro
-  # to the gov 1005 course.
-  
-  output$blurb <- renderText({
-    paste("Survivor is a hit reality TV show produced by CBS. Since its first episode aired in May 2000,
-    Survivor has enjoyed consistently high rates of viewership. It is touted as an exciting, adventurous,
-    clever, and family-friendly program. Indeed, the 38 seasons of Survivor since have seen many fans of the show go on to become participants
-    themselves. It's not just the allure of the $1 million prize, but also the coveted title of Sole Survivor.
-    Survivor follows a system in which around 20 participants are divided into two or more tribes.
-    They compete against the other tribe(s) in physical and mental challenges to avoid tribal council, which occurs
-    every other day. At tribal council, one person is voted off the island, so strategizing and forming
-    alliances are crucial to gameplay. Once around half of the participants are left, the tribes merge into
-    one, a process dubbed as 'The Merge'.\n
-
-    \n The Merge typically signifies truly individual gameplay; sometimes players vote with their voting bloc
-    to ensure that they are able to stick around, but players must also be conscious of building a resume.
-    The Sole Survivor, or ultimate winner, is voted for by a jury of around 8-10 people who were voted off post-merge.
-    Contestants are expected to balance a fine line by making flashy and bold moves to impress the jury, while
-    also making sure not to offend the jury or create personal tension.\n
-
-    \n The multifaceted nature of this complex game can be captured in the three areas that a successful contestant
-    excels in: Outwit, Outplay, and Outlast. Outwitting involves using advantages and twists to one's advantage,
-    as host Jeff Probst boasts of the unpredictability of the game. A consistent trademark advantage on Survivor
-    is the hidden immunity idol, which is typically located somewhere on the island for a crafty conestant to
-    find. Once in their possession, it can be given away but not stolen, and nullifies all votes to kick them off 
-    the island when played at one tribal council. Many players have potentially lost $1 million or kept themselves in the
-    game depending on their usage of their immunity idol.
-
-    \n The second area is Outplay, which involves the large physical portion of the game. Survivor sees contestants
-    lose dozens of pounds due to malnourishment, and frequent physical challenges are staged to determine which tribe
-    gets sent to tribal council. Outplaying also entails the proper usages of legacies and advantages gifted to
-    players, as well as maintaining a healthy social game and being able to 'rally the troops' or so to speak.
+    # Create the blurb that introduces what Survivor is, why it's so interesting
+    # to analyze, and the two datasets that I utilized, as well as a brief intro
+    # to the gov 1005 course.
     
-    \n Lastly, of course, you must outlast the other players. With the exception of one season, the last day is the 39th day.
-    Outlasting entails all of the above: ensuring you get enough food to eat to stay physically well,
-    ensuring your social relationships maintain your social spot in the game, and doing well in challenges
-    to accomplish both tasks.
-
-    I am curious about high-level trends that distinguish those who win from those who do not. Does age play a factor? Gender?
-    What are the occupations of those who win? Where do Survivor contestants call home - is it a uniform spread across
-    the map, as CBS may be looking for diversity, or are there clusters around metropolitan areas? How do people play immunity
-    idols, and does their usage have an effect on how many days someone lasts? Do winners excel more in the Outwit, Outplay, or
-    Outlast area? What distinguishes the winner from the other two runner-ups who survive all 39 days as well?
-    Are less votes against someone a good indicator that they ran below the radar and therefore correlated with a higher finish place,
-    or are less votes a sign that someone wasn't really a contender for the game and corresponds to a lower finish place?
-    ")
+    output$blurb <- renderText({
+        paste("Survivor is a hit reality TV show produced by CBS. Since its first episode aired in May 2000,
+        Survivor has enjoyed consistently high rates of viewership. It is touted as an exciting, adventurous,
+        clever, and family-friendly program. Indeed, the 38 seasons of Survivor since have seen many fans of the show go on to become participants
+        themselves. It's not just the allure of the $1 million prize, but also the coveted title of Sole Survivor.
+        Survivor follows a system in which around 20 participants are divided into two or more tribes.
+        They compete against the other tribe(s) in physical and mental challenges to avoid tribal council, which occurs
+        every other day. At tribal council, one person is voted off the island, so strategizing and forming
+        alliances are crucial to gameplay. Once around half of the participants are left, the tribes merge into
+        one, a process dubbed as 'The Merge'.\n
+    
+        \n The Merge typically signifies truly individual gameplay; sometimes players vote with their voting bloc
+        to ensure that they are able to stick around, but players must also be conscious of building a resume.
+        The Sole Survivor, or ultimate winner, is voted for by a jury of around 8-10 people who were voted off post-merge.
+        Contestants are expected to balance a fine line by making flashy and bold moves to impress the jury, while
+        also making sure not to offend the jury or create personal tension.\n
+    
+        \n The multifaceted nature of this complex game can be captured in the three areas that a successful contestant
+        excels in: Outwit, Outplay, and Outlast. Outwitting involves using advantages and twists to one's advantage,
+        as host Jeff Probst boasts of the unpredictability of the game. A consistent trademark advantage on Survivor
+        is the hidden immunity idol, which is typically located somewhere on the island for a crafty conestant to
+        find. Once in their possession, it can be given away but not stolen, and nullifies all votes to kick them off 
+        the island when played at one tribal council. Many players have potentially lost $1 million or kept themselves in the
+        game depending on their usage of their immunity idol.
+    
+        \n The second area is Outplay, which involves the large physical portion of the game. Survivor sees contestants
+        lose dozens of pounds due to malnourishment, and frequent physical challenges are staged to determine which tribe
+        gets sent to tribal council. Outplaying also entails the proper usages of legacies and advantages gifted to
+        players, as well as maintaining a healthy social game and being able to 'rally the troops' or so to speak.
+        
+        \n Lastly, of course, you must outlast the other players. With the exception of one season, the last day is the 39th day.
+        Outlasting entails all of the above: ensuring you get enough food to eat to stay physically well,
+        ensuring your social relationships maintain your social spot in the game, and doing well in challenges
+        to accomplish both tasks.
+    
+        I am curious about high-level trends that distinguish those who win from those who do not. Does age play a factor? Gender?
+        What are the occupations of those who win? Where do Survivor contestants call home - is it a uniform spread across
+        the map, as CBS may be looking for diversity, or are there clusters around metropolitan areas? How do people play immunity
+        idols, and does their usage have an effect on how many days someone lasts? Do winners excel more in the Outwit, Outplay, or
+        Outlast area? What distinguishes the winner from the other two runner-ups who survive all 39 days as well?
+        Are less votes against someone a good indicator that they ran below the radar and therefore correlated with a higher finish place,
+        or are less votes a sign that someone wasn't really a contender for the game and corresponds to a lower finish place?
+        ")
+    })
+  
+    # Define the data_explorer output as a DataTable
+    
+    output$data_explorer <- DT::renderDataTable({
+    
+        # Require that a season is selected or else an error message will pop up
+        
+        req(input$select_season)
+    
+        # Define data as survivor_data
+        
+        data <- survivor_data
+        
+        # Subset the data based on the slider inputs for the age_slider,
+        # days_slider, and idols_slider, subsetting to the first and second values,
+        # which represent the min and max values
+    
+        data <- subset(data,
+                       age >= input$age_slider[1] &
+                       age <= input$age_slider[2] &
+                       daysLasted >= input$days_slider[1] &
+                       daysLasted <= input$days_slider[2] &
+                       idols_played >= input$idols_slider[1] &
+                       idols_played <= input$idols_slider[2])
+    
+        # Use an if loop to subset the data if All if not selected
+        
+        if (input$select_season != "All") {
+          data <- subset(data, season.x == input$select_season)
+        }
+    
+        # Use an if loop to subset the data if Sole Survivor is selected so that
+        # only those who finished first are selected
+        
+        if (input$winner == "Sole Survivor") {
+          data <- subset(data, finish == 1)
+        }
+    
+        # Use an if loop to subset the data if the length of gender_check is only
+        # one (indicating that only one gender is selected) to the gender checked
+        
+        if (length(input$gender_check) == 1) {
+          data <- subset(data, gender == input$gender_check)
+        }
+    
+        # Call data again to actually display the data
+        
+        data
+        
   })
   
-  # Define the data_explorer output as a DataTable
+    output$winnerPlot <- renderPlot ({
+      
+        data <- survivor_data
+      
+        data <- subset(data,
+                     finish == 1)
+      
+        p <- ggplot(data, mapping = aes(x = gender, fill = gender)) +
+             geom_bar(width = .3) +
+             theme_minimal()
+        
+        p
+      
+    })
   
-  output$data_explorer <- DT::renderDataTable({
+    output$agePlot <- renderPlot ({
     
-    # Require that a season is selected or else an error message will pop up
+        data <- survivor_data %>%
+          filter(finish == 1) %>%
+          mutate(age_words = case_when(
+            age <= 19 ~ "Less than 18",
+            age >= 20 & age <= 29 ~ "20-29 years old",
+            age >= 30 & age <= 39 ~ "30-39 years old",
+            age >= 40 & age <= 49 ~ "40-49 years old",
+            age >- 50 & age <= 59 ~ "50-59 years old")) %>%
+          group_by(age_words) %>%
+          mutate(ct = n()) %>%
+          ungroup() %>%
+          select(age_words, ct) %>%
+          distinct() %>%
+          arrange(ct)
     
-    req(input$select_season)
-    
-    # Define data as survivor_data
-    
-    data <- survivor_data
-    
-    # Subset the data based on the slider inputs for the age_slider,
-    # days_slider, and idols_slider, subsetting to the first and second values,
-    # which represent the min and max values
-    
-    data <- subset(data,
-                   age >= input$age_slider[1] &
-                   age <= input$age_slider[2] &
-                   daysLasted >= input$days_slider[1] &
-                   daysLasted <= input$days_slider[2] &
-                   idols_played >= input$idols_slider[1] &
-                   idols_played <= input$idols_slider[2])
-    
-    # Use an if loop to subset the data if All if not selected
-    
-    if (input$select_season != "All") {
-      data <- subset(data, season.x == input$select_season)
-    }
-    
-    # Use an if loop to subset the data if Sole Survivor is selected so that
-    # only those who finished first are selected
-    
-    if (input$winner == "Sole Survivor") {
-      data <- subset(data, finish == 1)
-    }
-    
-    # Use an if loop to subset the data if the length of gender_check is only
-    # one (indicating that only one gender is selected) to the gender checked
-    
-    if (length(input$gender_check) == 1) {
-      data <- subset(data, gender == input$gender_check)
-    }
-    
-    # Call data again to actually display the data
-    
-      data
-  })
-  
-  output$winnerPlot <- renderPlot ({
-    
-    data <- survivor_data
-    
-    data <- subset(data,
-                   finish == 1)
-    
-    p <- ggplot(data, mapping = aes(x = gender, fill = gender)) +
-         geom_bar(width = .3) +
-         theme_minimal()
-    p
-    
-  })
-  
-  output$agePlot <- renderPlot ({
-    
-    data <- survivor_data %>%
-      filter(finish == 1) %>%
-      mutate(age_words = case_when(
-        age <= 19 ~ "Less than 18",
-        age >= 20 & age <= 29 ~ "20-29 years old",
-        age >= 30 & age <= 39 ~ "30-39 years old",
-        age >= 40 & age <= 49 ~ "40-49 years old",
-        age >- 50 & age <= 59 ~ "50-59 years old"
-      )) %>%
-      group_by(age_words) %>%
-      mutate(ct = n()) %>%
-      ungroup() %>%
-      select(age_words, ct) %>%
-      distinct() %>%
-      arrange(ct)
-    
-    p <- ggplot(data, aes(x = age_words, y = ct)) +
-      geom_col() +
-      coord_flip() +
-      theme_minimal() +
-      ylab(NULL) +
-      xlab(NULL) +
-      scale_y_continuous(breaks = seq(0, 20, by = 2))
-    
-    p
-    
+        p <- ggplot(data, aes(x = age_words, y = ct)) +
+                    geom_col() +
+                    coord_flip() +
+                    theme_minimal() +
+                    ylab(NULL) +
+                    xlab(NULL) +
+                    scale_y_continuous(breaks = seq(0, 20, by = 2))
+        
+        p
     
   })
   
   
-  output$outlastPlot <- renderPlot ({
+    output$outlastPlot <- renderPlot ({
     
-    data <- survivor_data
-    
-    data <- subset(data,
+        data <- survivor_data
+        
+        data <- subset(data,
                    
-                   # Filter out the N/A values for individual challenge wins,
-                   # which indicates that the contestant was voted out before
-                   # the merge
+                       # Filter out the N/A values for individual challenge wins,
+                       # which indicates that the contestant was voted out before
+                       # the merge
                    
-                   individualChallengeWins != "N/A" &
-                     
-                     # Filter out those who lasted less than two weeks, or 14
-                     # days. Since the merge is usually the mid-way point and
-                     # contain around a dozen remaining contestants, it varies
-                     # season to season, but the merge has never occurred prior
-                     # to the two week mark.
-                     
-                     daysLasted > 14)
+                       individualChallengeWins != "N/A" &
+                         
+                       # Filter out those who lasted less than two weeks, or 14
+                       # days. Since the merge is usually the mid-way point and
+                       # contain around a dozen remaining contestants, it varies
+                       # season to season, but the merge has never occurred prior
+                       # to the two week mark.
+                       
+                       daysLasted > 14)
     
-    # Create the ggplot object that will hold the actual histogram
+        # Create the ggplot object that will hold the actual histogram
     
-    p <-  ggplot(data, mapping = aes(x = individualChallengeWins)) +
-      geom_histogram(show.legend =FALSE) +
+        p <-  ggplot(data, mapping = aes(x = individualChallengeWins)) +
+              geom_histogram(show.legend =FALSE) +
       
-      # Change the scaling for the x-axis to be easier to read
+        # Change the scaling for the x-axis to be easier to read
       
-      scale_x_continuous(breaks = seq(0, 10, by = 1)) +
-      labs(title = "Individual Challenge Wins By Post-Merge Constestants In 37 Seasons of Survivor",
-           subtitle = "Skewed right plots for number of individual wins show that they are rare for both genders,\n although more on the high extreme for men",
-           caption = "Source: https://raw.githubusercontent.com/davekwiatkowski/survivor-data/master/player-data.json") +
+        scale_x_continuous(breaks = seq(0, 10, by = 1)) +
+        labs(title = "Individual Challenge Wins By Post-Merge Constestants In 37 Seasons of Survivor",
+             subtitle = "Skewed right plots for number of individual wins show that they are rare for both genders,\n although more on the high extreme for men",
+             caption = "Source: https://raw.githubusercontent.com/davekwiatkowski/survivor-data/master/player-data.json") +
       
-      # Facet by gender
-      
-      facet_grid(~gender) +
-      theme_minimal()
+        # Facet by gender
+        
+        facet_grid(~gender) +
+        theme_minimal()
     
-    # Call the ggplot object
-    p
+        # Call the ggplot object
+        
+        p
     
   })
 }
