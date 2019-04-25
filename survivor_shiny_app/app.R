@@ -156,24 +156,24 @@ ui <- fluidPage(
     tabPanel("Outwit: Idols",
       mainPanel(
         tabsetPanel(type = "tabs",
-                    tabPanel("About", textOutput("blurb")),
-                    tabPanel("Data Explorer", dataTableOutput("data_explorer"))))),
+                    tabPanel("Outwit Text", textOutput("outwit_text")),
+                    tabPanel("Outwit", dataTableOutput("outwit"))))),
     
     # Create a tab in the navbar for the outplay portion
     
     tabPanel("Outplay: Immunity and Challenges",
       mainPanel(
         tabsetPanel(type = "tabs",
-                    tabPanel("About", textOutput("blurb")),
-                    tabPanel("Data Explorer", dataTableOutput("data_explorer"))))),
+                    tabPanel("Outplay Text", textOutput("outplay_text")),
+                    tabPanel("Outplay", dataTableOutput("outplay"))))),
     
     # Create a tab in the navbar for the outlast portion
     
     tabPanel("Outlast: High Level Trends",
              mainPanel(
                tabsetPanel(type = "tabs",
-                           tabPanel("About", textOutput("blurb")),
-                           tabPanel("Data Explorer", dataTableOutput("data_explorer")))),
+                           tabPanel("Outlast Text", textOutput("outlast_text")),
+                           tabPanel("Outlast", dataTableOutput("Outlast")))),
       sidebarLayout(
         sidebarPanel(
           
@@ -210,9 +210,22 @@ server <- function(input, output) {
     "hello this is Survivor!"
   })
   
-  output$data_explorer <- renderDataTable({
+  # Define the data_explorer output as a DataTable
+  
+  output$data_explorer <- DT::renderDataTable({
+    
+    # Require that a season is selected or else an error message will pop up
+    
     req(input$select_season)
+    
+    # Define data as survivor_data
+    
     data <- survivor_data
+    
+    # Subset the data based on the slider inputs for the age_slider,
+    # days_slider, and idols_slider, subsetting to the first and second values,
+    # which represent the min and max values
+    
     data <- subset(data,
                    age >= input$age_slider[1] &
                    age <= input$age_slider[2] &
@@ -220,17 +233,28 @@ server <- function(input, output) {
                    daysLasted <= input$days_slider[2] &
                    idols_played >= input$idols_slider[1] &
                    idols_played <= input$idols_slider[2])
+    
+    # Use an if loop to subset the data if All if not selected
+    
     if (input$select_season != "All") {
       data <- subset(data, season.x == input$select_season)
     }
+    
+    # Use an if loop to subset the data if Sole Survivor is selected so that
+    # only those who finished first are selected
     
     if (input$winner == "Sole Survivor") {
       data <- subset(data, finish == 1)
     }
     
+    # Use an if loop to subset the data if the length of gender_check is only
+    # one (indicating that only one gender is selected) to the gender checked
+    
     if (length(input$gender_check) == 1) {
       data <- subset(data, gender == input$gender_check)
     }
+    
+    # Call data again to actually display the data
     
       data
   })
