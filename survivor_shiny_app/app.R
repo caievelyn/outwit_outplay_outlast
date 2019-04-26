@@ -134,8 +134,9 @@ ui <- fluidPage(
       tabPanel("Outwit: Idol Play",
           mainPanel(
               tabsetPanel(type = "tabs",
-                  tabPanel("Outwit Text", textOutput("outwit_text")),
-                      tabPanel("Outwit", dataTableOutput("outwit"))
+                  tabPanel("Outwit", gt_output("idolfindingPlot"),
+                                     br(),
+                                     gt_output("idolfinding2Plot"))
                   )
               )
           ),
@@ -273,6 +274,52 @@ server <- function(input, output) {
         data
         
   })
+    
+    output$idolfindingPlot <- render_gt({
+      
+      data <- survivor_data
+      
+      g <- data %>%
+           filter(finish == 1) %>%
+           select(idols_found) %>%
+           group_by(idols_found) %>%
+           count() %>%
+           ungroup() %>%
+           mutate(all = sum(n),
+                  proportion = n / all) %>%
+           select(idols_found, proportion) %>%
+           gt() %>%
+           cols_label(idols_found = "Idols Found",
+                     proportion = "Proportion") %>%
+           tab_header(title = "Immunity Idol Hunting: Sole Survivors",
+                      subtitle = "Over 40% found at least one") %>%
+          cols_align("center")
+          
+      g
+    })
+    
+    
+    output$idolfinding2Plot <- render_gt({
+      data <- survivor_data
+      
+      g <- data %>%
+        select(idols_found) %>%
+        group_by(idols_found) %>%
+        count() %>%
+        ungroup() %>%
+        mutate(all = sum(n),
+               proportion = n / all) %>%
+        select(idols_found, proportion) %>%
+        gt() %>%
+        cols_label(idols_found = "Idols Found",
+                   proportion = "Proportion") %>%
+        tab_header(title = "Immunity Idol Hunting: All Contestants",
+                   subtitle = "Only about 10% found one or more idols") %>%
+        cols_align("center")
+      
+      g
+    })
+    
   
     output$winnerPlot <- renderPlot ({
       
