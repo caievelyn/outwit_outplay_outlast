@@ -10,6 +10,8 @@ library(DT)
 library(shinythemes)
 library(shinyWidgets)
 library(gt)
+library(ggthemes)
+library(fivethirtyeight)
 
 # Read in the rds file
 
@@ -459,7 +461,7 @@ server <- function(input, output) {
       
         p <- ggplot(data, mapping = aes(x = gender, fill = gender)) +
              geom_bar(width = .3) +
-             theme_minimal()
+             theme_fivethirtyeight()
         
         p
       
@@ -488,24 +490,24 @@ server <- function(input, output) {
                     theme_minimal() +
                     ylab(NULL) +
                     xlab(NULL) +
-                    scale_y_continuous(breaks = seq(0, 20, by = 2))
+                    scale_y_continuous(breaks = seq(0, 20, by = 2)) +
+                    theme_fivethirtyeight()
         
         p
     
     })
     
-    
     output$winnertotalPlot <- renderPlot({
+      
       data <- subset(survivor_data,
                      finish == 1)
       p <- ggplot(data, aes(x = totalWins)) +
                   geom_bar() +
-                  theme_minimal()
+                  theme_fivethirtyeight()
       
       p
       
     })
-  
   
     output$outlastPlot <- renderPlot ({
     
@@ -542,7 +544,7 @@ server <- function(input, output) {
         # Facet by gender
         
         facet_grid(~gender) +
-        theme_minimal()
+        theme_fivethirtyeight()
     
         # Call the ggplot object
         
