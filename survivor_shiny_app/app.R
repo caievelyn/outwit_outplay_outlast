@@ -9,10 +9,11 @@ library(rebus)
 library(DT)
 library(shinythemes)
 library(shinyWidgets)
+library(gt)
 
 # Read in the rds file
 
-survivor_data <- read_rds("survivor_data.rds")
+survivor_data <- read_rds("www/survivor_data.rds")
 
 # Define UI for application
 
@@ -146,8 +147,11 @@ ui <- fluidPage(
       tabPanel("Outplay: Immunity & Challenges",
           mainPanel(
               tabsetPanel(type = "tabs",
-                  tabPanel("Outplay Text", textOutput("outplay_text")),
-                      tabPanel("Outplay", dataTableOutput("outplay"))
+                  tabPanel("Outplay", plotOutput("winsComparisonPlot"),
+                           h4("As shown above, there is a negative correlation between the finish number and the mean number of wins,
+                              indicating that those who place higher generally have more wins. Of course, we cannot determine a causal relationship,
+                              as those who place higher have more opportunities to win since they stay in the game longer. Therefore, we can
+                              take a look at the Final Three contestants who lasted until day 39 for every season, as pictured below.", style = "color:white"))
                   )
               )
           ),
@@ -274,6 +278,34 @@ server <- function(input, output) {
         data
         
   })
+    
+    output$winsComparisonPlot <- renderPlot({
+      
+      data <- survivor_data
+      
+      p <- data %>%
+        group_by(finish) %>%
+        summarize(wins_total = mean(totalWins), wins_tribal = mean(tribalChallengeWins)) %>%
+        ungroup() %>%
+        mutate(wins_tribal = replace_na(wins_tribal, 0)) %>%
+        gather(key = "win_type", value = "mean", wins_total, wins_tribal) %>%
+        arrange(finish) %>%
+        group_by(finish, win_type) %>%
+        ggplot(aes(x = finish, y = mean, color = win_type)) +
+        geom_line(size = 1.1, show.legend = FALSE) +
+        scale_color_brewer(type = 'seq', palette = 'Dark2') +
+        annotate("text", x = 5, y = 8.5, size = 5, color = "#289E80", label = "Total Wins") +
+        annotate("text", x = 7, y = 5, size = 5, color = "#E35934", label = "Tribal Wins") +
+        scale_x_continuous(breaks = seq(1, 20, by = 1)) +
+        scale_y_continuous(breaks = seq(0, 10, by = 2)) +
+        theme_fivethirtyeight()
+      
+      p
+    })
+    
+    
+    
+    
     
     output$idolfindingPlot <- renderTable({
       
