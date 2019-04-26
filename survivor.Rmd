@@ -63,6 +63,7 @@ survivor_data <- x %>%
                                `2` = "Runner-Up",
                                `2` = "Co-Runner-Up",
                                `3` = "2nd Runner-Up",
+                               `3` = "3rd",
                                `4` = "4th",
                                `5` = "5th",
                                `6` = "6th",
@@ -205,6 +206,7 @@ all_data$idols_found[is.na(all_data$idols_found)] <- 0
 # Change the NA values created through the join in the idols_played column to 0
 
 all_data$idols_played[is.na(all_data$idols_played)] <- 0
+
 
 
 write_rds(all_data, "survivor_data.rds")

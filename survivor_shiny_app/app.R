@@ -134,7 +134,7 @@ ui <- fluidPage(
       tabPanel("Outwit: Idol Play",
           mainPanel(
               tabsetPanel(type = "tabs",
-                  tabPanel("Outwit", gt_output("idolfindingPlot"),
+                  tabPanel("Outwit", tableOutput("idolfindingPlot"),
                                      br(),
                                      gt_output("idolfinding2Plot"))
                   )
@@ -275,7 +275,7 @@ server <- function(input, output) {
         
   })
     
-    output$idolfindingPlot <- render_gt({
+    output$idolfindingPlot <- renderTable({
       
       data <- survivor_data
       
