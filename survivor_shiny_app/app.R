@@ -227,7 +227,7 @@ ui <- fluidPage(
       # Create a tab in the navbar for the Outwit portion
     
       tabPanel("Outwit: Idol Play",
-          mainPanel(
+          mainPanel(width = 8,
               tabsetPanel(type = "tabs",
                   tabPanel("Outwit", tableOutput("idolfindingPlot"),
                                      br(),
@@ -239,7 +239,7 @@ ui <- fluidPage(
       # Create a tab in the navbar for the outplay portion
     
       tabPanel("Outplay: Immunity & Challenges",
-          mainPanel(
+          mainPanel(width = 8,
               tabsetPanel(type = "tabs",
                   tabPanel("Outplay",
                            plotOutput("winsComparisonPlot"),
@@ -262,7 +262,8 @@ ui <- fluidPage(
                            number of wins influenced their ultimate win, or
                            whether a 'Sole Survivor'-type contestant just
                            naturally tends to win more, there is a clear
-                           indicator hear that Sole Survivors tend to win."))
+                           indicator here that Sole Survivors tend to win.",
+                           style = "color:white"))
                   )
               )
           ),
@@ -281,7 +282,7 @@ ui <- fluidPage(
                            plotOutput("winnertotalPlot")),
                   tabPanel("High-Level Trends",
                            plotOutput("outlastPlot"))),
-              width = 12
+              width = 8
               )
           )
       )
@@ -313,7 +314,8 @@ server <- function(input, output) {
         # days_slider, and idols_slider, subsetting to the first and second values,
         # which represent the min and max values
     
-        data <- subset(data,
+        data <- data %>%
+                       filter(
                        age >= input$age_slider[1] &
                        age <= input$age_slider[2] &
                        daysLasted >= input$days_slider[1] &
@@ -322,23 +324,24 @@ server <- function(input, output) {
                        idols_played <= input$idols_slider[2])
     
         # Use an if loop to subset the data if All if not selected
+        # %in%
         
         if (input$select_season != "All") {
-          data <- subset(data, season.x == input$select_season)
+          data <- filter(data, season.x %in% input$select_season)
         }
     
         # Use an if loop to subset the data if Sole Survivor is selected so that
         # only those who finished first are selected
         
         if (input$winner == "Sole Survivor") {
-          data <- subset(data, finish == 1)
+          data <- filter(data, finish == 1)
         }
     
         # Use an if loop to subset the data if the length of gender_check is only
         # one (indicating that only one gender is selected) to the gender checked
         
         if (length(input$gender_check) == 1) {
-          data <- subset(data, gender == input$gender_check)
+          data <- filter(data, gender == input$gender_check)
         }
     
         # Call data again to actually display the data
