@@ -207,7 +207,7 @@ all_data$idols_found[is.na(all_data$idols_found)] <- 0
 
 all_data$idols_played[is.na(all_data$idols_played)] <- 0
 
-
+all_data$finish <- as.numeric(as.character(all_data$finish))
 
 write_rds(all_data, "survivor_data.rds")
 ```
