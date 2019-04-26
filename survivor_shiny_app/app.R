@@ -241,12 +241,26 @@ ui <- fluidPage(
               tabsetPanel(type = "tabs",
                   tabPanel("Outplay",
                            plotOutput("winsComparisonPlot"),
-                           h4("As shown above, there is a negative correlation between the finish number and the mean number of wins,
-                              indicating that those who place higher generally have more wins. Of course, we cannot determine a causal relationship,
-                              as those who place higher have more opportunities to win since they stay in the game longer. Therefore, we can
-                              take a look at the Final Three contestants who lasted until day 39 for every season, as pictured below.", style = "color:white"),
+                           h4("As shown above, there is a negative correlation
+                           between the finish number and the mean number of
+                           wins, indicating that those who place higher
+                           generally have more wins. Of course, we cannot
+                           determine a causal relationship, as those who place
+                           higher have more opportunities to win since they
+                           stay in the game longer. Therefore, we can take a
+                           look at the Final Three contestants who lasted
+                           until day 39 for every season, as pictured below.",
+                           style = "color:white"),
                            br(),
-                           plotOutput("finalThreeComparisonPlot"))
+                           plotOutput("finalThreeComparisonPlot"),
+                           h4("Sole Survivors tend to win more in tribal and
+                           individual challenges, increasing their total wins,
+                           compared to the first- and second- runners up.
+                           While we cannot determine whether their increased
+                           number of wins influenced their ultimate win, or
+                           whether a 'Sole Survivor'-type contestant just
+                           naturally tends to win more, there is a clear
+                           indicator hear that Sole Survivors tend to win."))
                   )
               )
           ),
@@ -337,17 +351,21 @@ server <- function(input, output) {
       
       p <- data %>%
         group_by(finish) %>%
-        summarize(wins_total = mean(totalWins), wins_tribal = mean(tribalChallengeWins)) %>%
+        summarize(wins_total = mean(totalWins),
+                  wins_tribal = mean(tribalChallengeWins),
+                  wins_ind = mean(individualChallengeWins)) %>%
         ungroup() %>%
-        mutate(wins_tribal = replace_na(wins_tribal, 0)) %>%
-        gather(key = "win_type", value = "mean", wins_total, wins_tribal) %>%
+        mutate(wins_tribal = replace_na(wins_tribal, 0),
+               wins_ind = replace_na(wins_ind, 0)) %>%
+        gather(key = "win_type", value = "mean", wins_total, wins_tribal, wins_ind) %>%
         arrange(finish) %>%
         group_by(finish, win_type) %>%
         ggplot(aes(x = finish, y = mean, color = win_type)) +
         geom_line(size = 1.1, show.legend = FALSE) +
         scale_color_brewer(type = 'seq', palette = 'Dark2') +
-        annotate("text", x = 5, y = 8.5, size = 5, color = "#289E80", label = "Total Wins") +
-        annotate("text", x = 7, y = 5, size = 5, color = "#E35934", label = "Tribal Wins") +
+        annotate("text", x = 3.5, y = 1, size = 5, color = "#289E80", label = "Individual") +
+        annotate("text", x = 4, y = 8.5, size = 5, color = "#E35934", label = "Total") +
+        annotate("text", x = 6, y = 5, size = 5, color = "#5639A6", label = "Tribal") +
         scale_x_continuous(breaks = seq(1, 20, by = 1)) +
         scale_y_continuous(breaks = seq(0, 10, by = 2)) +
         theme_fivethirtyeight()
@@ -363,7 +381,9 @@ server <- function(input, output) {
         filter(daysLasted == max(daysLasted)) %>%
         ungroup() %>%
         group_by(finish) %>%
-        summarize(wins_total = mean(totalWins), wins_tribal = mean(tribalChallengeWins), wins_ind = mean(individualChallengeWins)) %>%
+        summarize(wins_total = mean(totalWins),
+                  wins_tribal = mean(tribalChallengeWins),
+                  wins_ind = mean(individualChallengeWins)) %>%
         ungroup() %>%
         mutate(wins_tribal = replace_na(wins_tribal, 0),
                wins_ind = replace_na(wins_ind, 0)) %>%
