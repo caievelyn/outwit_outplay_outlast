@@ -12,6 +12,7 @@ library(shinyWidgets)
 library(gt)
 library(ggthemes)
 library(fivethirtyeight)
+library(ggmap)
 
 # Read in the rds file
 
@@ -21,9 +22,9 @@ survivor_data <- read_rds("www/survivor_data.rds")
 
 ui <- fluidPage(
   
-  # Change theme using shinytheme library to 'simplex'
+  # Change theme using shinytheme library to 'united'
   
-  theme = shinytheme("simplex"),
+  theme = shinytheme("united"),
   
   # Application title
   
@@ -215,7 +216,9 @@ ui <- fluidPage(
                           are less votes a sign that someone wasn't really a
                           contender for the game and corresponds to a lower
                           finish place?"),
-                          h1("Thanks to ")),
+                          h1("Data source: @davekwiatkowski (Github)")),
+                  br(),
+                  h2("Data Explorer: Survivor Contestants' Information"),
                   tabPanel("Data Explorer", dataTableOutput("data_explorer"))
                   )
               )

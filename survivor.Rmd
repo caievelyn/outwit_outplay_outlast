@@ -48,12 +48,6 @@ x <- read_csv("survivor.csv",
 ```{r cleanup, message = FALSE, error = FALSE}
 
 survivor_data <- x %>%
-
-    # Separate the hometown column into the city and state abbreviation, which
-    # we will later use to map out where Survivor contestants and winners hail
-    # from in the country by city and state
-  
-    separate(col = "hometown", sep =  c(", "), into = c("city", "state_abbr")) %>%
   
     # Rename runner-ups to 2nd place, sole survivors to 1st place, and recode
     # from character strings to doubles
