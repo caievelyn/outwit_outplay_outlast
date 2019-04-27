@@ -25,17 +25,13 @@ ui <- fluidPage(
   
   theme = shinytheme("simplex"),
   
-  # Change the background image to Survivor
-  
-  setBackgroundImage(src = "https://www.hardwoodandhollywood.com/wp-content/uploads/2017/03/Survivor-1.jpg"),
-  
   # Application title
   
-  h1(" Survivor: Outwit, Outplay, Outlast", style = "color:white"),
+  h1(" Survivor: Outwit, Outplay, Outlast"),
   
   # Add a caption detailing what the project is for
   
-  h4("by Evelyn Cai, for Gov 1005, a data course at Harvard University", style = "color:white"),
+  h4("by Evelyn Cai, for Gov 1005, a data course at Harvard University"),
   
   # Create the navigation bar
   
@@ -125,8 +121,12 @@ ui <- fluidPage(
               
           mainPanel(
               tabsetPanel(type = "tabs",
+                          
+                  # Add a panel that explains what Survivor is and where the
+                  # data comes from
+                          
                   tabPanel("About",
-                           h2("The Hit CBS Reality TV Show", style = "color:white"),
+                           h2("The Hit CBS Reality TV Show"),
                            h4("Survivor is a hit reality TV show produced by
                            CBS. Since its first episode aired in May 2000,
                            Survivor has enjoyed consistently high rates of
@@ -145,9 +145,9 @@ ui <- fluidPage(
                            strategizing and forming alliances are crucial to
                            gameplay. Once around half of the participants are
                            left, the tribes merge into one, a process dubbed
-                           as 'The Merge'.", style = "color:white"),
+                           as 'The Merge'."),
                            br(),
-                           h2("The Merge: Voting and Strategy", style = "color:white"),
+                           h2("The Merge: Voting and Strategy"),
                           h4("The Merge typically signifies truly individual
                           gameplay; sometimes players vote with their voting
                           bloc to ensure that they are able to stick around,
@@ -157,11 +157,10 @@ ui <- fluidPage(
                           voted off post-merge. Contestants are expected to
                           balance a fine line by making flashy and bold moves
                           to impress the jury, while also making sure not to
-                          offend the jury or create personal tension.",
-                          style = "color:white"),
+                          offend the jury or create personal tension."),
                           br(),
-                          h2("Outwit, Outplay, Outlast", style = "color:white"),
-                          h3("Outwit", style = "color:white"),
+                          h2("Outwit, Outplay, Outlast"),
+                          h3("Outwit"),
                           h4("The multifaceted nature of this complex game can
                           be captured in the three areas that a successful
                           contestant excels in: Outwit, Outplay, and Outlast.
@@ -176,8 +175,8 @@ ui <- fluidPage(
                           played at one tribal council. Many players have
                           potentially lost $1 million or kept themselves in
                           the game depending on their usage of their immunity
-                          idol.", style = "color:white"),
-                          h3("Outplay", style = "color:white"),
+                          idol."),
+                          h3("Outplay"),
                           h4("The second area is Outplay, which involves the
                           large physical portion of the game. Survivor sees
                           contestants lose dozens of pounds due to
@@ -186,19 +185,17 @@ ui <- fluidPage(
                           council. Outplaying also entails the proper usages
                           of legacies and advantages gifted to players, as
                           well as maintaining a healthy social game and being
-                          able to 'rally the troops' or so to speak.", style =
-                          "color:white"),
-                          h3("Outlast", style = "color:white"),
+                          able to 'rally the troops' or so to speak."),
+                          h3("Outlast"),
                           h4("Lastly, of course, you must outlast the other
                           players. With the exception of one season, the last
                           day is the 39th day. Outlasting entails all of the
                           above: ensuring you get enough food to eat to stay
                           physically well, ensuring your social relationships
                           maintain your social spot in the game, and doing
-                          well in challenges to accomplish both tasks.", style
-                          = "color:white"),
+                          well in challenges to accomplish both tasks."),
                           br(),
-                          h2("Guiding Questions", style = "color:white"),
+                          h2("Guiding Questions"),
                           br(),
                           h4("I am curious about high-level trends that
                           distinguish those who win from those who do not.
@@ -217,7 +214,8 @@ ui <- fluidPage(
                           therefore correlated with a higher finish place, or
                           are less votes a sign that someone wasn't really a
                           contender for the game and corresponds to a lower
-                          finish place?", style = "color:white")),
+                          finish place?"),
+                          h1("Thanks to ")),
                   tabPanel("Data Explorer", dataTableOutput("data_explorer"))
                   )
               )
@@ -251,8 +249,7 @@ ui <- fluidPage(
                            higher have more opportunities to win since they
                            stay in the game longer. Therefore, we can take a
                            look at the Final Three contestants who lasted
-                           until day 39 for every season, as pictured below.",
-                           style = "color:white"),
+                           until day 39 for every season, as pictured below."),
                            br(),
                            plotOutput("finalThreeComparisonPlot"),
                            h4("Sole Survivors tend to win more in tribal and
@@ -262,8 +259,7 @@ ui <- fluidPage(
                            number of wins influenced their ultimate win, or
                            whether a 'Sole Survivor'-type contestant just
                            naturally tends to win more, there is a clear
-                           indicator here that Sole Survivors tend to win.",
-                           style = "color:white"))
+                           indicator here that Sole Survivors tend to win."))
                   )
               )
           ),
