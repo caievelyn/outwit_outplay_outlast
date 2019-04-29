@@ -272,17 +272,13 @@ ui <- fluidPage(
       # Create a tab in the navbar for the outlast portion
     
       tabPanel("Outlast: Sole Survivor & Trends",
-             
           # Output a plot
         
           mainPanel(
               tabsetPanel(type = "tabs",
-                  tabPanel("Winner Analysis",
-                           plotOutput("winnerPlot"),
-                           plotOutput("agePlot"),
-                           plotOutput("winnertotalPlot")),
+                  tabPanel("Winner Analysis"),
                   tabPanel("High-Level Trends",
-                           plotOutput("outlastPlot")))
+                           leafletOutput("outlastPlot")))
               )
           )
       )
@@ -455,103 +451,17 @@ server <- function(input, output) {
     })
     
   
-    output$winnerPlot <- renderPlot ({
-      
-        data <- survivor_data
-      
-        data <- subset(data,
-                     finish == 1)
-      
-        p <- ggplot(data, mapping = aes(x = gender, fill = gender)) +
-             geom_bar(width = .3) +
-             theme_fivethirtyeight()
-        
-        p
-      
-    })
-  
-    output$agePlot <- renderPlot ({
+    output$outlastPlot <- renderLeaflet({
     
-        data <- survivor_data %>%
-          filter(finish == 1) %>%
-          mutate(age_words = case_when(
-            age <= 19 ~ "Less than 18",
-            age >= 20 & age <= 29 ~ "20-29 years old",
-            age >= 30 & age <= 39 ~ "30-39 years old",
-            age >= 40 & age <= 49 ~ "40-49 years old",
-            age >- 50 & age <= 59 ~ "50-59 years old")) %>%
-          group_by(age_words) %>%
-          mutate(ct = n()) %>%
-          ungroup() %>%
-          select(age_words, ct) %>%
-          distinct() %>%
-          arrange(ct)
-    
-        p <- ggplot(data, aes(x = age_words, y = ct)) +
-                    geom_col() +
-                    coord_flip() +
-                    theme_minimal() +
-                    ylab(NULL) +
-                    xlab(NULL) +
-                    scale_y_continuous(breaks = seq(0, 20, by = 2)) +
-                    theme_fivethirtyeight()
-        
-        p
-    
-    })
-    
-    output$winnertotalPlot <- renderPlot({
+      data <- survivor_data
       
-      data <- subset(survivor_data,
-                     finish == 1)
-      p <- ggplot(data, aes(x = totalWins)) +
-                  geom_bar() +
-                  theme_fivethirtyeight()
+      m <- data %>%
+        leaflet() %>%
+        addProviderTiles("Stamen.Terrain") %>%
+        setView(lng = -92.5, lat = 40, zoom = 3.25) %>%
+        addCircleMarkers(radius = 5, popup = ~contestant)
       
-      p
-      
-    })
-  
-    output$outlastPlot <- renderPlot ({
-    
-        data <- survivor_data
-        
-        data <- subset(data,
-                   
-                       # Filter out the N/A values for individual challenge wins,
-                       # which indicates that the contestant was voted out before
-                       # the merge
-                   
-                       individualChallengeWins != "N/A" &
-                         
-                       # Filter out those who lasted less than two weeks, or 14
-                       # days. Since the merge is usually the mid-way point and
-                       # contain around a dozen remaining contestants, it varies
-                       # season to season, but the merge has never occurred prior
-                       # to the two week mark.
-                       
-                       daysLasted > 14)
-    
-        # Create the ggplot object that will hold the actual histogram
-    
-        p <-  ggplot(data, mapping = aes(x = individualChallengeWins)) +
-              geom_histogram(show.legend =FALSE) +
-      
-        # Change the scaling for the x-axis to be easier to read
-      
-        scale_x_continuous(breaks = seq(0, 10, by = 1)) +
-        labs(title = "Individual Challenge Wins By Post-Merge Constestants In 37 Seasons of Survivor",
-             subtitle = "Skewed right plots for number of individual wins show that they are rare for both genders,\n although more on the high extreme for men",
-             caption = "Source: https://raw.githubusercontent.com/davekwiatkowski/survivor-data/master/player-data.json") +
-      
-        # Facet by gender
-        
-        facet_grid(~gender) +
-        theme_fivethirtyeight()
-    
-        # Call the ggplot object
-        
-        p
+      m
     
     })
 }
