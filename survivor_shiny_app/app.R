@@ -121,12 +121,13 @@ ui <- fluidPage(
                   submitButton(text = "Display")
                   ),
               
-          # Define the main panel UI    
+          # Define the main panel UI that will output a datatable. Use DT's data
+          # tables, which are interactive
               
           mainPanel(
               tabsetPanel(type = "tabs",
                   h2("Data Explorer: Survivor Contestants' Information"),
-                  tabPanel("Data Explorer", dataTableOutput("data_explorer"))
+                  tabPanel("Data Explorer", DT::dataTableOutput("data_explorer"))
                   )
               )
           )
@@ -137,6 +138,9 @@ ui <- fluidPage(
       tabPanel("Outwit: Idol Play",
           mainPanel(width = 8,
               tabsetPanel(type = "tabs",
+                  
+                  # Output the table for idol finding                
+                          
                   tabPanel("Outwit", tableOutput("idolfindingPlot"),
                                      br(),
                                      gt_output("idolfinding2Plot"))
@@ -150,7 +154,14 @@ ui <- fluidPage(
           mainPanel(width = 8,
               tabsetPanel(type = "tabs",
                   tabPanel("Outplay",
+                           
+                           # Output the plot comparing three types of wins to
+                           # the finish place of a contestant
+                           
                            plotOutput("winsComparisonPlot"),
+                           
+                           # Describe the negative correlation
+                           
                            h4("As shown above, there is a negative correlation
                            between the finish number and the mean number of
                            wins, indicating that those who place higher
@@ -161,7 +172,15 @@ ui <- fluidPage(
                            look at the Final Three contestants who lasted
                            until day 39 for every season, as pictured below."),
                            br(),
+                           
+                           # Output the plot comparing the finish place of the
+                           # three contestants who made it to the end to their
+                           # number of wins
+                           
                            plotOutput("finalThreeComparisonPlot"),
+                           
+                           # Describe the trend
+                           
                            h4("Sole Survivors tend to win more in tribal and
                            individual challenges, increasing their total wins,
                            compared to the first- and second- runners up.
@@ -177,23 +196,37 @@ ui <- fluidPage(
       # Create a tab in the navbar for the outlast portion
     
       tabPanel("Outlast: Sole Survivor & Trends",
-          # Output a plot
-        
           mainPanel(
               tabsetPanel(type = "tabs",
+                  
+                  # Create one tab for winner analysis                
+                          
                   tabPanel("Winner Analysis"),
+                  
+                  # Create another tab for high-level trends and output a leaflet plot
+                  
                   tabPanel("High-Level Trends",
                            leafletOutput("outlastPlot")))
               )
           ),
       
-      # Add a panel that explains what Survivor is and where the data comes from
+      # Add an panel that explains what Survivor is and where the data comes
+      # from
         
         tabPanel("About",
+                 
+                 # Add a sidebar that talks about the project and the data
+                 # sources
+                 
                  sidebarLayout(
                    sidebarPanel(
                      h4("Thanks to blah and blah")
                    ),
+                   
+                 # Define the mainPanel, which will contain information about
+                 # Survivor and gameplay for those who are unfamiliar with the
+                 # TV show
+                   
                  mainPanel(
                  h2("The Hit CBS Reality TV Show"),
                  h4("Survivor is a hit reality TV show produced by
@@ -290,15 +323,9 @@ ui <- fluidPage(
 )
 )
 
-# Define server logic required to draw a histogram
+# Define server logic required to output the various plots
 
 server <- function(input, output) {
-  
-    # Create the blurb that introduces what Survivor is, why it's so interesting
-    # to analyze, and the two datasets that I utilized, as well as a brief intro
-    # to the gov 1005 course.
-    
-    
   
     # Define the data_explorer output as a DataTable
     
@@ -313,8 +340,10 @@ server <- function(input, output) {
         data <- survivor_data
         
         # Subset the data based on the slider inputs for the age_slider,
-        # days_slider, and idols_slider, subsetting to the first and second values,
-        # which represent the min and max values
+        # days_slider, and idols_slider, subsetting to the first and second
+        # values, which represent the min and max values of each variable. Use
+        # the greater than or equal to and less than or equal to signs to be
+        # inclusive of each value selected at the endpoints
     
         data <- data %>%
                        filter(
@@ -325,57 +354,115 @@ server <- function(input, output) {
                        idols_played >= input$idols_slider[1] &
                        idols_played <= input$idols_slider[2])
     
-        # Use an if loop to subset the data if All if not selected
-        # %in%
+        # Use an if loop to filter the data to the seasons selected if 'All' is
+        # not selected
         
         if (input$select_season != "All") {
           data <- filter(data, season.x %in% input$select_season)
         }
     
-        # Use an if loop to subset the data if Sole Survivor is selected so that
+        # Use an if loop to filter the data if Sole Survivor is selected so that
         # only those who finished first are selected
         
         if (input$winner == "Sole Survivor") {
           data <- filter(data, finish == 1)
         }
     
-        # Use an if loop to subset the data if the length of gender_check is only
-        # one (indicating that only one gender is selected) to the gender checked
+        # Use an if loop to filter the data if the length of gender_check is
+        # only one (indicating that only one gender is selected). Then filter
+        # for the gender checked
         
         if (length(input$gender_check) == 1) {
           data <- filter(data, gender == input$gender_check)
         }
     
-        # Call data again to actually display the data
+        # Call data again to actually display the transformed data; if the data
+        # was not altered, then the original data will be displayed
         
         data
         
   })
     
+    # Render a plot that compares the number of individual, tribal, and total
+    # wins to the finishing place of a contestant
+    
     output$winsComparisonPlot <- renderPlot({
+      
+      # Define data
       
       data <- survivor_data
       
+      # Create an object p that will store the plot
+      
       p <- data %>%
+        
+        # Group by the finish place so our calculations for the mean wins apply
+        # to each finishing group. Use summarize to easily calculate the mean
+        # and ungroup afterwards to prevent messing with the gather() function
+        
         group_by(finish) %>%
         summarize(wins_total = mean(totalWins),
                   wins_tribal = mean(tribalChallengeWins),
                   wins_ind = mean(individualChallengeWins)) %>%
         ungroup() %>%
+        
+        # Replace NA values with 0 so that we can plot those points later. Call
+        # this after the calculation of the means, as recoding NA values to 0
+        # prior would falsely indicate that those who did not make it far enough
+        # in the show to participate in individual immunity challenges actually
+        # did get to participate, but did not win.
+        
         mutate(wins_tribal = replace_na(wins_tribal, 0),
                wins_ind = replace_na(wins_ind, 0)) %>%
+        
+        # Use the gather function to group key values into one column for ease
+        # of plotting, with their current values placed into a new column titled
+        # "value".
+        
         gather(key = "win_type", value = "mean", wins_total, wins_tribal, wins_ind) %>%
+        
+        # Arrange by the finish place from first to twentieth
+        
         arrange(finish) %>%
+        
+        # Group by the finish and win_type
+        
         group_by(finish, win_type) %>%
+        
+        # Call a ggplot and pass the finish variable to the x-axis, and the mean
+        # values to the y-axis. Specify win_type as color so that three
+        # differently colored lines will be generated.
+        
         ggplot(aes(x = finish, y = mean, color = win_type)) +
+        
+        # Add a line, making it slightly thicker for ease of reading. Turn off
+        # the legend, since we will be manually annotating the graph.
+        
         geom_line(size = 1.1, show.legend = FALSE) +
+        
+        # Use the R Color Brewer palettes for color customization
+        
         scale_color_brewer(type = 'seq', palette = 'Dark2') +
+        
+        # Use the annotate() function to manually add labels to each line, using
+        # the hex color code to match the line color.
+        
         annotate("text", x = 3.5, y = 1, size = 5, color = "#289E80", label = "Individual") +
         annotate("text", x = 4, y = 8.5, size = 5, color = "#E35934", label = "Total") +
         annotate("text", x = 6, y = 5, size = 5, color = "#5639A6", label = "Tribal") +
+        
+        # Change the scaling and labelling of the x- and y- axes for ease of
+        # reading
+        
         scale_x_continuous(breaks = seq(1, 20, by = 1)) +
         scale_y_continuous(breaks = seq(0, 10, by = 2)) +
+        
+        # Change the theme to fivethirtyeight's theme, which is crisper and more
+        # minimal
+        
         theme_fivethirtyeight()
+      
+      # Call the plot so that it will show
       
       p
     })
