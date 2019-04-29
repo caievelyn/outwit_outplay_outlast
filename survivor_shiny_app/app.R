@@ -14,6 +14,7 @@ library(gt)
 library(ggthemes)
 library(fivethirtyeight)
 library(ggmap)
+library(leaflet)
 
 # Read in the rds file for the data on survivor contestants that includes the
 # geocoded location data and assign to survivor_data
@@ -124,102 +125,6 @@ ui <- fluidPage(
               
           mainPanel(
               tabsetPanel(type = "tabs",
-                          
-                  # Add a panel that explains what Survivor is and where the
-                  # data comes from
-                          
-                  tabPanel("About",
-                           h2("The Hit CBS Reality TV Show"),
-                           h4("Survivor is a hit reality TV show produced by
-                           CBS. Since its first episode aired in May 2000,
-                           Survivor has enjoyed consistently high rates of
-                           viewership. It is touted as an exciting,
-                           adventurous, clever, and family-friendly program.
-                           Indeed, the 38 seasons of Survivor since have seen
-                           many fans of the show go on to become participants
-                           themselves. It's not just the allure of the $1
-                           million prize, but also the coveted title of Sole
-                           Survivor. Survivor follows a system in which around
-                           20 participants are divided into two or more
-                           tribes. They compete against the other tribe(s) in
-                           physical and mental challenges to avoid tribal
-                           council, which occurs every other day. At tribal
-                           council, one person is voted off the island, so
-                           strategizing and forming alliances are crucial to
-                           gameplay. Once around half of the participants are
-                           left, the tribes merge into one, a process dubbed
-                           as 'The Merge'."),
-                           br(),
-                           h2("The Merge: Voting and Strategy"),
-                          h4("The Merge typically signifies truly individual
-                          gameplay; sometimes players vote with their voting
-                          bloc to ensure that they are able to stick around,
-                          but players must also be conscious of building a
-                          resume. The Sole Survivor, or ultimate winner, is
-                          voted for by a jury of around 8-10 people who were
-                          voted off post-merge. Contestants are expected to
-                          balance a fine line by making flashy and bold moves
-                          to impress the jury, while also making sure not to
-                          offend the jury or create personal tension."),
-                          br(),
-                          h2("Outwit, Outplay, Outlast"),
-                          h3("Outwit"),
-                          h4("The multifaceted nature of this complex game can
-                          be captured in the three areas that a successful
-                          contestant excels in: Outwit, Outplay, and Outlast.
-                          Outwitting involves using advantages and twists to
-                          one's advantage, as host Jeff Probst boasts of the
-                          unpredictability of the game. A consistent trademark
-                          advantage on Survivor is the hidden immunity idol,
-                          which is typically located somewhere on the island
-                          for a crafty conestant to find. Once in their
-                          possession, it can be given away but not stolen, and
-                          nullifies all votes to kick them off the island when
-                          played at one tribal council. Many players have
-                          potentially lost $1 million or kept themselves in
-                          the game depending on their usage of their immunity
-                          idol."),
-                          h3("Outplay"),
-                          h4("The second area is Outplay, which involves the
-                          large physical portion of the game. Survivor sees
-                          contestants lose dozens of pounds due to
-                          malnourishment, and frequent physical challenges are
-                          staged to determine which tribe gets sent to tribal
-                          council. Outplaying also entails the proper usages
-                          of legacies and advantages gifted to players, as
-                          well as maintaining a healthy social game and being
-                          able to 'rally the troops' or so to speak."),
-                          h3("Outlast"),
-                          h4("Lastly, of course, you must outlast the other
-                          players. With the exception of one season, the last
-                          day is the 39th day. Outlasting entails all of the
-                          above: ensuring you get enough food to eat to stay
-                          physically well, ensuring your social relationships
-                          maintain your social spot in the game, and doing
-                          well in challenges to accomplish both tasks."),
-                          br(),
-                          h2("Guiding Questions"),
-                          br(),
-                          h4("I am curious about high-level trends that
-                          distinguish those who win from those who do not.
-                          Does age play a factor? Gender? What are the
-                          occupations of those who win? Where do Survivor
-                          contestants call home - is it a uniform spread
-                          across the map, as CBS may be looking for diversity,
-                          or are there clusters around metropolitan areas? How
-                          do people play immunity idols, and does their usage
-                          have an effect on how many days someone lasts? Do
-                          winners excel more in the Outwit, Outplay, or
-                          Outlast area? What distinguishes the winner from the
-                          other two runner-ups who survive all 39 days as
-                          well? Are less votes against someone a good
-                          indicator that they ran below the radar and
-                          therefore correlated with a higher finish place, or
-                          are less votes a sign that someone wasn't really a
-                          contender for the game and corresponds to a lower
-                          finish place?"),
-                          h1("Data source: @davekwiatkowski (Github)")),
-                  br(),
                   h2("Data Explorer: Survivor Contestants' Information"),
                   tabPanel("Data Explorer", dataTableOutput("data_explorer"))
                   )
@@ -280,9 +185,110 @@ ui <- fluidPage(
                   tabPanel("High-Level Trends",
                            leafletOutput("outlastPlot")))
               )
-          )
+          ),
+      
+      # Add a panel that explains what Survivor is and where the data comes from
+        
+        tabPanel("About",
+                 sidebarLayout(
+                   sidebarPanel(
+                     h4("Thanks to blah and blah")
+                   ),
+                 mainPanel(
+                 h2("The Hit CBS Reality TV Show"),
+                 h4("Survivor is a hit reality TV show produced by
+                    CBS. Since its first episode aired in May 2000,
+                    Survivor has enjoyed consistently high rates of
+                    viewership. It is touted as an exciting,
+                    adventurous, clever, and family-friendly program.
+                    Indeed, the 38 seasons of Survivor since have seen
+                    many fans of the show go on to become participants
+                    themselves. It's not just the allure of the $1
+                    million prize, but also the coveted title of Sole
+                    Survivor. Survivor follows a system in which around
+                    20 participants are divided into two or more
+                    tribes. They compete against the other tribe(s) in
+                    physical and mental challenges to avoid tribal
+                    council, which occurs every other day. At tribal
+                    council, one person is voted off the island, so
+                    strategizing and forming alliances are crucial to
+                    gameplay. Once around half of the participants are
+                    left, the tribes merge into one, a process dubbed
+                    as 'The Merge'."),
+                 br(),
+                 h2("The Merge: Voting and Strategy"),
+                 h4("The Merge typically signifies truly individual
+                    gameplay; sometimes players vote with their voting
+                    bloc to ensure that they are able to stick around,
+                    but players must also be conscious of building a
+                    resume. The Sole Survivor, or ultimate winner, is
+                    voted for by a jury of around 8-10 people who were
+                    voted off post-merge. Contestants are expected to
+                    balance a fine line by making flashy and bold moves
+                    to impress the jury, while also making sure not to
+                    offend the jury or create personal tension."),
+                 br(),
+                 h2("Outwit, Outplay, Outlast"),
+                 h3("Outwit"),
+                 h4("The multifaceted nature of this complex game can
+                    be captured in the three areas that a successful
+                    contestant excels in: Outwit, Outplay, and Outlast.
+                    Outwitting involves using advantages and twists to
+                    one's advantage, as host Jeff Probst boasts of the
+                    unpredictability of the game. A consistent trademark
+                    advantage on Survivor is the hidden immunity idol,
+                    which is typically located somewhere on the island
+                    for a crafty conestant to find. Once in their
+                    possession, it can be given away but not stolen, and
+                    nullifies all votes to kick them off the island when
+                    played at one tribal council. Many players have
+                    potentially lost $1 million or kept themselves in
+                    the game depending on their usage of their immunity
+                    idol."),
+                 h3("Outplay"),
+                 h4("The second area is Outplay, which involves the
+                    large physical portion of the game. Survivor sees
+                    contestants lose dozens of pounds due to
+                    malnourishment, and frequent physical challenges are
+                    staged to determine which tribe gets sent to tribal
+                    council. Outplaying also entails the proper usages
+                    of legacies and advantages gifted to players, as
+                    well as maintaining a healthy social game and being
+                    able to 'rally the troops' or so to speak."),
+                 h3("Outlast"),
+                 h4("Lastly, of course, you must outlast the other
+                    players. With the exception of one season, the last
+                    day is the 39th day. Outlasting entails all of the
+                    above: ensuring you get enough food to eat to stay
+                    physically well, ensuring your social relationships
+                    maintain your social spot in the game, and doing
+                    well in challenges to accomplish both tasks."),
+                 br(),
+                 h2("Guiding Questions"),
+                 br(),
+                 h4("I am curious about high-level trends that
+                    distinguish those who win from those who do not.
+                    Does age play a factor? Gender? What are the
+                    occupations of those who win? Where do Survivor
+                    contestants call home - is it a uniform spread
+                    across the map, as CBS may be looking for diversity,
+                    or are there clusters around metropolitan areas? How
+                    do people play immunity idols, and does their usage
+                    have an effect on how many days someone lasts? Do
+                    winners excel more in the Outwit, Outplay, or
+                    Outlast area? What distinguishes the winner from the
+                    other two runner-ups who survive all 39 days as
+                    well? Are less votes against someone a good
+                    indicator that they ran below the radar and
+                    therefore correlated with a higher finish place, or
+                    are less votes a sign that someone wasn't really a
+                    contender for the game and corresponds to a lower
+                    finish place?"),
+                 h1("Data source: @davekwiatkowski (Github)"))
       )
   )
+)
+)
 
 # Define server logic required to draw a histogram
 
