@@ -47,7 +47,7 @@ ui <- fluidPage(
       tabPanel("Explore the Dataset",
           sidebarLayout(
               sidebarPanel(
-                          
+      
                   # Create a selectInput for the user to select a specific
                   # season(s), or all the seasons. Multiple = TRUE so users can
                   # select more than one season.
@@ -282,8 +282,7 @@ ui <- fluidPage(
                            plotOutput("agePlot"),
                            plotOutput("winnertotalPlot")),
                   tabPanel("High-Level Trends",
-                           plotOutput("outlastPlot"))),
-              width = 8
+                           plotOutput("outlastPlot")))
               )
           )
       )

@@ -141,23 +141,23 @@ individualWins <-c(3, 3, 3, 5, 4, 6, 6)
 
 # Populate the data for the number of individualChallengeWins
 
-survivor_data[667:673, 8] <- individualWins
+survivor_data[667:673, 7] <- individualWins
 
 # Populate the data for the number of totalWins by creating a numerical vector
 # of the tribalChallengewins and adding it to the number in the corresponding
 # position in the individualWins numerical vector
 
-survivor_data[667:673, 9] <- individualWins + survivor_data[667:673, 7]
+survivor_data[667:673, 8] <- individualWins + survivor_data[667:673, 7]
 
 # Populate the number of days lasted using information from the aforementioned
 # Wiki article
 
-survivor_data[667:673, 10] <- c( 37, 39, 35, 36, 38, 39, 39)
+survivor_data[667:673, 9] <- c( 37, 39, 35, 36, 38, 39, 39)
 
 # Populate the total number of votes each player received by the end of 39 days
 # or whenever they were eliminated
 
-survivor_data[667:673, 11] <- c( 18, 6, 13, 0, 6, 1, 0)
+survivor_data[667:673, 10] <- c( 18, 6, 13, 0, 6, 1, 0)
 ```
 
 
@@ -229,4 +229,3 @@ geo_join <- left_join(all_data, geocoded, by = "hometown")
 write_rds(geo_join, "geo_join.rds")
 
 ```
-
