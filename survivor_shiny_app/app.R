@@ -37,9 +37,9 @@ ui <- fluidPage(
   
   h4("by Evelyn Cai, for Gov 1005, a data course at Harvard University"),
   
-  # Create the navigation bar
+  # Create the navigation bar, making the title blank
   
-  navbarPage("Survivor!",
+  navbarPage("",
              
       # Create the dataset explorer tab. This wil render a data table, so add a
       # sidebar layout with various different functionalities to filter the
@@ -125,8 +125,8 @@ ui <- fluidPage(
           # tables, which are interactive
               
           mainPanel(
+            h2("Data Explorer: Survivor Contestants' Information"),
               tabsetPanel(type = "tabs",
-                  h2("Data Explorer: Survivor Contestants' Information"),
                   tabPanel("Data Explorer", DT::dataTableOutput("data_explorer"))
                   )
               )
@@ -141,7 +141,7 @@ ui <- fluidPage(
                   
                   # Output the table for idol finding                
                           
-                  tabPanel("Outwit", tableOutput("idolfindingPlot"),
+                  tabPanel("Outwit", gt_output("idolfindingPlot"),
                                      br(),
                                      gt_output("idolfinding2Plot"))
                   )
@@ -220,7 +220,12 @@ ui <- fluidPage(
                  
                  sidebarLayout(
                    sidebarPanel(
-                     h4("Thanks to blah and blah")
+                     h4("This project was created for Gov 1005: Data, a course taught by David Kane at Harvard University."),
+                     br(),
+                     h4("Major thanks are owed to Dave Kwiatkowski for compiling ", a("the contestant data.", href="https://github.com/davekwiatkowski/survivor-data"),
+                        "The", a("immunity idol data", href = "https://docs.google.com/spreadsheets/d/1jTtpv3pdivUWo3oF3nGBWcDnG69cTw63QHfXgsfXgTI/edit#gid=0"), "was obtained from Jeff Pitman as of March 2019."),
+                     br(),
+                     h4("A link to the Github repository can be found", a("here.", href = "https://github.com/caievelyn/outwit_outplay_outlast"))
                    ),
                    
                  # Define the mainPanel, which will contain information about
@@ -316,11 +321,10 @@ ui <- fluidPage(
                     therefore correlated with a higher finish place, or
                     are less votes a sign that someone wasn't really a
                     contender for the game and corresponds to a lower
-                    finish place?"),
-                 h1("Data source: @davekwiatkowski (Github)"))
+                    finish place?"))
+                 )
+                 )
       )
-  )
-)
 )
 
 # Define server logic required to output the various plots
@@ -465,82 +469,196 @@ server <- function(input, output) {
       # Call the plot so that it will show
       
       p
+      
     })
     
+    # Render a faceted bar plot displaying the difference in average wins for
+    # those who lasted the same number of days based on finish place
+    
     output$finalThreeComparisonPlot <- renderPlot({
+      
+      # Define data
+      
       data <- survivor_data
+      
+      # Store the plot in an object to be called later
+      
       p <- data %>%
         select(season_number, totalWins, tribalChallengeWins, individualChallengeWins, finish, daysLasted) %>%
+        
+        # Group by season number and filter for those who lasted the maximum
+        # number of days for their season (indicating that they were in the
+        # Final Two or Final Three). Ungroup afterwards for ease of using the
+        # gather() function later.
+        
         group_by(season_number) %>%
         filter(daysLasted == max(daysLasted)) %>%
         ungroup() %>%
+        
+        # Group by finish place and perform the mean function to find the mean
+        # for each type of win: tribal, individual, and total. Ungroup
+        # afterwards.
+        
         group_by(finish) %>%
         summarize(wins_total = mean(totalWins),
                   wins_tribal = mean(tribalChallengeWins),
                   wins_ind = mean(individualChallengeWins)) %>%
         ungroup() %>%
+        
+        # Replace NA values with 0 so that we can plot those points later. Call
+        # this after the calculation of the means, as recoding NA values to 0
+        # prior would falsely indicate that those who did not make it far enough
+        # in the show to participate in individual immunity challenges actually
+        # did get to participate, but did not win.
+        
         mutate(wins_tribal = replace_na(wins_tribal, 0),
                wins_ind = replace_na(wins_ind, 0)) %>%
+        
+        # Use the gather function to group key values into one column for ease
+        # of plotting, with their current values placed into a new column titled
+        # "value".
+        
         gather(key = "win_type", value = "mean", wins_total, wins_tribal, wins_ind) %>%
         arrange(finish) %>%
+        
+        # Call a ggplot, passing finish place to the x- variable and mean to the
+        # y- variable. Fill the bar with a color that corresponds to the finish
+        # place, so that we can get rid of the legend.
+        
         ggplot(aes(x = finish, y = mean, fill = finish)) +
-        geom_col() +
+        
+        # Call a bar graph, getting rid of the legend
+        
+        geom_col(show.legend = FALSE) +
+        
+        # Use R Color Brewer palettes for color customization
+        
         scale_color_brewer(type = "div", palette = "Dark2") +
+        
+        # Change the tick mark values and labels for the y-axis
+        
         scale_y_continuous(breaks = seq(0, 10, by = 2)) +
+        
+        # Facet by the type of win (individual, total, and tribal)
+        
         facet_wrap(~win_type) +
+        
+        # Alter theme to be more minimal
+        
         theme_fivethirtyeight()
+      
+      # Call the plot so that it shows on the app
       
       p
       
     })
     
+    # Create a GT graphic displaying the percentage of Sole Survivors who found
+    # a certain number of idols
     
-    
-    
-    
-    output$idolfindingPlot <- renderTable({
+    output$idolfindingPlot <- render_gt({
       
       data <- survivor_data
       
-      g <- data %>%
-           filter(finish == 1) %>%
-           select(idols_found) %>%
-           group_by(idols_found) %>%
-           count() %>%
-           ungroup() %>%
-           mutate(all = sum(n),
-                  proportion = n / all) %>%
-           select(idols_found, proportion) %>%
-           gt() %>%
-           cols_label(idols_found = "Idols Found",
-                     proportion = "Proportion") %>%
-           tab_header(title = "Immunity Idol Hunting: Sole Survivors",
-                      subtitle = "Over 40% found at least one") %>%
-          cols_align("center")
-          
-      g
-    })
-    
-    
-    output$idolfinding2Plot <- render_gt({
-      data <- survivor_data
+      # Store graphic in an object called g
       
       g <- data %>%
+        
+        # Filter only for Sole Survivors and select idols_found
+        
+        filter(finish == 1) %>%
         select(idols_found) %>%
+        
+        # Count the number contestants who found a certain number of idols
+        
         group_by(idols_found) %>%
         count() %>%
         ungroup() %>%
+        
+        # Find the total number of contestants by adding up n
+        
         mutate(all = sum(n),
+               
+               # Calculate the proportion by dividing the number of contestants
+               # in one group by the total number of contestants
+               
                proportion = n / all) %>%
         select(idols_found, proportion) %>%
+        
+        # Call gt
+        
         gt() %>%
+        
+        # Ensure that the proportions are displayed as percentages
+        
+        fmt_percent(columns = vars(proportion)) %>%
+        
+        # Add appropriate labels and headers, and center the columns
+        
         cols_label(idols_found = "Idols Found",
-                   proportion = "Proportion") %>%
-        tab_header(title = "Immunity Idol Hunting: All Contestants",
-                   subtitle = "Only about 10% found one or more idols") %>%
+                   proportion = "Percentage") %>%
+        tab_header(title = "Immunity Idol Hunting: Sole Survivors",
+                   subtitle = "Over 40% found one or more idols") %>%
         cols_align("center")
       
+      # Call the object name so it will show up
+      
       g
+      
+    })
+      
+      # Create a GT graphic displaying the percentage of Sole Survivors who found
+      # a certain number of idols
+      
+      output$idolfinding2Plot <- render_gt({
+        
+        data <- survivor_data
+        
+        # Store graphic in an object called g
+        
+        g <- data %>%
+          
+          # Filter out Sole Survivors and select idols_found
+          
+          filter(finish != 1) %>%
+          select(idols_found) %>%
+          
+          # Count the number contestants who found a certain number of idols
+          
+          group_by(idols_found) %>%
+          count() %>%
+          ungroup() %>%
+          
+          # Find the total number of contestants by adding up n
+          
+          mutate(all = sum(n),
+                 
+                 # Calculate the proportion by dividing the number of contestants
+                 # in one group by the total number of contestants
+                 
+                 proportion = n / all) %>%
+          select(idols_found, proportion) %>%
+          
+          # Call gt
+          
+          gt() %>%
+          
+          # Ensure that the proportions are displayed as percentages
+          
+          fmt_percent(columns = vars(proportion)) %>%
+          
+          # Add appropriate labels and align the columns to center
+          
+          cols_label(idols_found = "Idols Found",
+                     proportion = "Percentage") %>%
+          tab_header(title = "Immunity Idol Hunting: non-Winners",
+                     subtitle = "Only about 10% found one or more idols") %>%
+          cols_align("center")
+      
+      # Call the object to display it
+        
+      g
+      
     })
     
   
@@ -557,6 +675,7 @@ server <- function(input, output) {
       m
     
     })
+    
 }
 
 
