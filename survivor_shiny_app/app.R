@@ -1,3 +1,4 @@
+
 # Load the appropriate libraries
 
 library(shiny)
@@ -14,9 +15,10 @@ library(ggthemes)
 library(fivethirtyeight)
 library(ggmap)
 
-# Read in the rds file
+# Read in the rds file for the data on survivor contestants that includes the
+# geocoded location data and assign to survivor_data
 
-survivor_data <- read_rds("www/survivor_data.rds")
+survivor_data <- read_rds("www/geo_join.rds")
 
 # Define UI for application
 

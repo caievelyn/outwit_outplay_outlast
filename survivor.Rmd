@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo = FALSE)
 library(tidyverse)
 library(janitor)
 library(rebus)
+library(ggmap)
 ```
 
 ```{r setup_x, warning = FALSE, message = FALSE}
@@ -202,6 +203,30 @@ all_data$idols_found[is.na(all_data$idols_found)] <- 0
 all_data$idols_played[is.na(all_data$idols_played)] <- 0
 
 all_data$finish <- as.numeric(as.character(all_data$finish))
-
-write_rds(all_data, "survivor_data.rds")
 ```
+
+```{r geocoding, message = FALSE, warning = FALSE}
+
+# Select only for the hometown column and find the distinct hometowns
+
+geocoded <- all_data %>%
+  select(hometown) %>%
+  distinct() %>%
+  
+  # Use ggmap's geocoding functionality using the Google Maps Geocoding API to
+  # encode longitude and latitude values for the given cities and states. You
+  # may need to use the register_google() function, passing in your hashed API
+  # key as the argument.
+  
+  mutate_geocode(hometown)
+
+# Merge the geocoded information with the original data
+
+geo_join <- left_join(all_data, geocoded, by = "hometown")
+
+# Write to an rds file to read through the shiny app later
+
+write_rds(geo_join, "geo_join.rds")
+
+```
+
