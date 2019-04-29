@@ -35,7 +35,7 @@ ui <- fluidPage(
   
   # Add a caption detailing what the project is for
   
-  h4("by Evelyn Cai, for Gov 1005, a data course at Harvard University"),
+  h4("by Evelyn Cai for GOV1005"),
   
   # Create the navigation bar, making the title blank
   
@@ -135,8 +135,9 @@ ui <- fluidPage(
     
       # Create a tab in the navbar for the Outwit portion
     
-      tabPanel("Outwit: Idol Play",
+      tabPanel("Outwit",
           mainPanel(width = 8,
+            h2("Outwit: Idol Play"),
               tabsetPanel(type = "tabs",
                   
                   # Output the table for idol finding                
@@ -150,8 +151,9 @@ ui <- fluidPage(
     
       # Create a tab in the navbar for the outplay portion
     
-      tabPanel("Outplay: Immunity & Challenges",
+      tabPanel("Outplay",
           mainPanel(width = 8,
+            h2("Outplay: Immunity & Challenges"),
               tabsetPanel(type = "tabs",
                   tabPanel("Outplay",
                            
@@ -195,8 +197,9 @@ ui <- fluidPage(
     
       # Create a tab in the navbar for the outlast portion
     
-      tabPanel("Outlast: Sole Survivor & Trends",
+      tabPanel("Outlast",
           mainPanel(
+            h2("Outlast: What Makes a Survivor Contestant and Winner?"),
               tabsetPanel(type = "tabs",
                   
                   # Create one tab for winner analysis                
@@ -205,7 +208,7 @@ ui <- fluidPage(
                   
                   # Create another tab for high-level trends and output a leaflet plot
                   
-                  tabPanel("High-Level Trends",
+                  tabPanel("Trends",
                            leafletOutput("outlastPlot")))
               )
           ),
@@ -220,12 +223,20 @@ ui <- fluidPage(
                  
                  sidebarLayout(
                    sidebarPanel(
-                     h4("This project was created for Gov 1005: Data, a course taught by David Kane at Harvard University."),
+                     
+                     # Make the width half of the remaining width from mainPanel
+                     # so the mainPanel is centered
+                     
+                     width = 3,
+                     
+                     # Add hyperlinks to the data sources and Github repo within the headers
+                     
+                     h5("This project was created for Gov 1005: Data, a course taught by David Kane at Harvard University."),
                      br(),
-                     h4("Major thanks are owed to Dave Kwiatkowski for compiling ", a("the contestant data.", href="https://github.com/davekwiatkowski/survivor-data"),
+                     h5("Major thanks are owed to Dave Kwiatkowski for compiling ", a("the contestant data.", href="https://github.com/davekwiatkowski/survivor-data"),
                         "The", a("immunity idol data", href = "https://docs.google.com/spreadsheets/d/1jTtpv3pdivUWo3oF3nGBWcDnG69cTw63QHfXgsfXgTI/edit#gid=0"), "was obtained from Jeff Pitman as of March 2019."),
                      br(),
-                     h4("A link to the Github repository can be found", a("here.", href = "https://github.com/caievelyn/outwit_outplay_outlast"))
+                     h5("A link to the Github repository can be found", a("here.", href = "https://github.com/caievelyn/outwit_outplay_outlast"))
                    ),
                    
                  # Define the mainPanel, which will contain information about
@@ -233,6 +244,11 @@ ui <- fluidPage(
                  # TV show
                    
                  mainPanel(
+                   
+                 # Make the width 6 so that it is centered with a side panel of
+                 # width 3
+                   
+                 width = 6,
                  h2("The Hit CBS Reality TV Show"),
                  h4("Survivor is a hit reality TV show produced by
                     CBS. Since its first episode aired in May 2000,
@@ -399,10 +415,20 @@ server <- function(input, output) {
       # Create an object p that will store the plot
       
       p <- data %>%
+        select(season_number, totalWins, tribalChallengeWins, individualChallengeWins, finish, daysLasted) %>%
         
-        # Group by the finish place so our calculations for the mean wins apply
-        # to each finishing group. Use summarize to easily calculate the mean
-        # and ungroup afterwards to prevent messing with the gather() function
+        # Group by season number and filter for those who lasted the maximum
+        # number of days for their season (indicating that they were in the
+        # Final Two or Final Three). Ungroup afterwards for ease of using the
+        # gather() function later.
+        
+        group_by(season_number) %>%
+        filter(daysLasted == max(daysLasted)) %>%
+        ungroup() %>%
+        
+        # Group by finish place and perform the mean function to find the mean
+        # for each type of win: tribal, individual, and total. Ungroup
+        # afterwards.
         
         group_by(finish) %>%
         summarize(wins_total = mean(totalWins),
@@ -425,46 +451,58 @@ server <- function(input, output) {
         
         gather(key = "win_type", value = "mean", wins_total, wins_tribal, wins_ind) %>%
         
-        # Arrange by the finish place from first to twentieth
+        # Relevel the factors before recoding since the variable names are clean and
+        # easy to work with still. Change them so that the faceted plot later will
+        # display from shortest bars to highest bars.
         
-        arrange(finish) %>%
+        mutate(win_type = fct_relevel(win_type, "wins_ind", "wins_tribal", "wins_total"),
+               
+               # Recode the factor levels for ease of display later in the ggplot
+               
+               win_type = fct_recode(win_type,
+                                     "Total Wins" = "wins_total",
+                                     "Tribal Wins" = "wins_tribal",
+                                     "Individual Wins" =  "wins_ind")) %>%
         
-        # Group by the finish and win_type
+        # Call a ggplot, passing finish place to the x- variable and mean to the
+        # y- variable. Fill the bar with a color that corresponds to the finish
+        # place, so that we can get rid of the legend.
         
-        group_by(finish, win_type) %>%
+        ggplot(aes(x = finish, y = mean, fill = finish)) +
         
-        # Call a ggplot and pass the finish variable to the x-axis, and the mean
-        # values to the y-axis. Specify win_type as color so that three
-        # differently colored lines will be generated.
+        # Call a bar graph, getting rid of the legend
         
-        ggplot(aes(x = finish, y = mean, color = win_type)) +
+        geom_col(show.legend = FALSE) +
         
-        # Add a line, making it slightly thicker for ease of reading. Turn off
-        # the legend, since we will be manually annotating the graph.
+        # Use R Color Brewer palettes for color customization
         
-        geom_line(size = 1.1, show.legend = FALSE) +
+        scale_color_brewer(type = "div", palette = "Dark2") +
         
-        # Use the R Color Brewer palettes for color customization
+        # Change the tick mark values and labels for the y-axis
         
-        scale_color_brewer(type = 'seq', palette = 'Dark2') +
-        
-        # Use the annotate() function to manually add labels to each line, using
-        # the hex color code to match the line color.
-        
-        annotate("text", x = 3.5, y = 1, size = 5, color = "#289E80", label = "Individual") +
-        annotate("text", x = 4, y = 8.5, size = 5, color = "#E35934", label = "Total") +
-        annotate("text", x = 6, y = 5, size = 5, color = "#5639A6", label = "Tribal") +
-        
-        # Change the scaling and labelling of the x- and y- axes for ease of
-        # reading
-        
-        scale_x_continuous(breaks = seq(1, 20, by = 1)) +
         scale_y_continuous(breaks = seq(0, 10, by = 2)) +
         
-        # Change the theme to fivethirtyeight's theme, which is crisper and more
-        # minimal
+        # Facet by the type of win (individual, total, and tribal)
         
-        theme_fivethirtyeight()
+        facet_wrap(~win_type) +
+        
+        # Change the labels of the x- and y- axes, add a title and subtitle, and add
+        # an appropriate title and subtitle
+        
+        labs(title = "Average Wins for the Final Three",
+             subtitle = "With the number of days lasted held constant, it appears that Sole\nSurvivors won more on average than their runner-ups") +
+        
+        # Alter theme to be more minimal via 538's theme (it has a great font and panel
+        # grid system!)
+        
+        theme_fivethirtyeight() +
+        
+        # Add back the axis titles
+        
+        theme(axis.title = element_text()) +
+        
+        xlab("Finishing Place") +
+        ylab("Average Number of Wins")
       
       # Call the plot so that it will show
       
@@ -542,6 +580,10 @@ server <- function(input, output) {
         # Facet by the type of win (individual, total, and tribal)
         
         facet_wrap(~win_type) +
+        
+        # Change the labels and add an appropriate title and subtitle
+        
+        labs()
         
         # Alter theme to be more minimal
         
@@ -661,16 +703,35 @@ server <- function(input, output) {
       
     })
     
+    # Create a leaflet plot showing the home cities of contestants  
   
     output$outlastPlot <- renderLeaflet({
     
       data <- survivor_data
       
+      # Store object to call later
+      
       m <- data %>%
+        
+        # Call leaflet
+        
         leaflet() %>%
+        
+        # Add pre-styled tiles; this one clearly delineates the state lines
+        # while maintaining visual appeal
+        
         addProviderTiles("Stamen.Terrain") %>%
+        
+        # Set the automatic view so that the United States are fully in view
+        
         setView(lng = -92.5, lat = 40, zoom = 3.25) %>%
+        
+        # Add circle markers with a smaller radius due to the large number of
+        # points and add a popup with the name of the contestant
+        
         addCircleMarkers(radius = 5, popup = ~contestant)
+      
+      # Call leaflet object for display
       
       m
     
