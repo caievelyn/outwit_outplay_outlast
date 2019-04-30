@@ -849,6 +849,7 @@ server <- function(input, output) {
       data <- survivor_data
       
       p <- data %>%
+        filter(is.na(finish)) %>%
         ggplot(aes(x = finish, y = 0, color = gender)) +
         geom_point() +
         transition_manual(season_number) +
@@ -864,7 +865,7 @@ server <- function(input, output) {
       p
       
       
-    }, height = 200, width = 400)
+    })
     
 }
 
