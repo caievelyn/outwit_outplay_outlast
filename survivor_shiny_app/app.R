@@ -35,7 +35,7 @@ ui <- fluidPage(
   
   # Add a caption detailing what the project is for
   
-  h4("by Evelyn Cai for GOV1005"),
+  h3("by Evelyn Cai for GOV1005"),
   
   # Create the navigation bar, making the title blank
   
@@ -136,7 +136,11 @@ ui <- fluidPage(
         sidebarLayout(
           sidebarPanel(
             width = 3,
-            h4("Description of this portion")),
+            h5("Immunity Idols are a trademark of Survivor. When played correctly,
+               they can guarantee immunity from being voted off for one tribal council."),
+            br(),
+            h5("Due to their power, they are well-hidden and searching for hidden immunity
+               idols has become a staple of good players.")),
           mainPanel(width = 6,
             h2("Outwit: Idol Play"),
             gt_output("idolfindingPlot"),
@@ -151,7 +155,13 @@ ui <- fluidPage(
         sidebarLayout(
           sidebarPanel(
             width = 3,
-            h4("description of this portion")),
+            h5("Tribal challenges are the mostly physical, sometimes mental challenges before the Merge
+               that determine which tribe gets sent to tribal council to vote off a member. They can
+               also award winners with food or comfort items."),
+            br(),
+            h5("Later, individual immunity challenges become the only way to guarantee safety in the game,
+               and both help a player by providing security, but also hinder their game by publicizing
+               their physical strength.")),
           mainPanel(width = 6,
             h2("Outplay: Immunity & Challenges"),
                            
@@ -201,7 +211,11 @@ ui <- fluidPage(
         sidebarLayout(
           sidebarPanel(
           width = 3,
-          h3("decsription")),
+          h5("Getting voted off is an automatic disqualifier for the 1 million dollar prize,
+             so outlasting is one of the most important components to the game."),
+          br(),
+          h5("Typically, three contestants last until the last day - they are dubbed the Final
+             Three and are voted upon to determine the ultimate Sole Survivor.")),
           mainPanel(
             width = 6,
             h2("Outlast: What Makes a Survivor Contestant and Winner?"),
@@ -753,7 +767,7 @@ server <- function(input, output) {
         
         # Add circle markers that are blue for non-winners
         
-        addCircleMarkers(radius = 8,
+        addCircleMarkers(radius = 6.5,
                          
                          # Remove the stroke, which adds to the radius
                          
@@ -784,7 +798,7 @@ server <- function(input, output) {
         # Add circle markers that are red for winners
         
         addCircleMarkers(data = data2,
-                         radius = 8,
+                         radius = 6.5,
                          
                          # Remove the stroke, which adds to the radius
                          
