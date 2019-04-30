@@ -15,6 +15,7 @@ library(ggthemes)
 library(fivethirtyeight)
 library(ggmap)
 library(leaflet)
+library(gganimate)
 
 # Read in the rds file for the data on survivor contestants that includes the
 # geocoded location data and assign to survivor_data
@@ -226,7 +227,7 @@ ui <- fluidPage(
                   tabPanel("Trends",
                            h3("Hometowns of Survivor Contestants"),
                            h5("Sole Survivors are in red"),
-                           leafletOutput("outlastPlot")),
+                           leafletOutput("outlastPlot"),
                            br(),
                   
                            # Describe the trends seen in the map
@@ -237,6 +238,10 @@ ui <- fluidPage(
                               a significant clumping effect around urban areas, and the plot is rather 
                               dense around the Northeast compared to all other areas in the United States,
                               besides Los Angeles."),
+                          br(),
+                          plotOutput("animatedorderPlot")
+                          
+                  ),
                   
                   # Create another tab for high-level trends and output a leaflet plot
                   
@@ -838,6 +843,28 @@ server <- function(input, output) {
       m2
     
     })
+    
+    output$animatedorderPlot <- renderPlot ({
+      
+      data <- survivor_data
+      
+      p <- data %>%
+        ggplot(aes(x = finish, y = 0, color = gender)) +
+        geom_point() +
+        transition_manual(season_number) +
+        ggtitle("Season {current_frame}") +
+        labs(subtitle = "Order of those voted off, with 20th place on the far right and 1st on the left") +
+        theme_fivethirtyeight() +
+        theme(panel.grid = element_blank()) +
+        theme(axis.title = element_text()) +
+        scale_x_continuous(breaks = seq(1, 20, by = 1)) +
+        xlab("Finish") +
+        ylab(NULL)
+      
+      p
+      
+      
+    }, height = 200, width = 400)
     
 }
 
