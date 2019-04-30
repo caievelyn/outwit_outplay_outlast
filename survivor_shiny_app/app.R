@@ -137,10 +137,11 @@ ui <- fluidPage(
         sidebarLayout(
           sidebarPanel(
             width = 3,
-            h4("Immunity Idols are a trademark of Survivor. When played correctly,
+            img(src = "https://vignette.wikia.nocookie.net/survivor/images/4/41/Thailand_Immunity_Idol.jpg/revision/latest/zoom-crop/width/240/height/240?cb=20120427222241", width = 225, height = 200),
+            h5("Immunity Idols are a trademark of Survivor. When played correctly,
                they can guarantee immunity from being voted off for one tribal council."),
             br(),
-            h4("Due to their power, they are well-hidden and searching for hidden immunity
+            h5("Due to their power, they are well-hidden and searching for hidden immunity
                idols has become a staple of good players.")),
           mainPanel(width = 6,
             h2("Outwit: Idol Play"),
@@ -156,11 +157,12 @@ ui <- fluidPage(
         sidebarLayout(
           sidebarPanel(
             width = 3,
-            h4("Tribal challenges are the mostly physical, sometimes mental challenges before the Merge
+            img(src = "https://imagesvc.timeincapp.com/v3/fan/image?url=https://survivingtribal.com/wp-content/blogs.dir/399/files/2017/11/Survivor-season-35-episode-9-immunity-challenge.jpg&c=sc&w=1200&h=675", width = 225, height = 200),
+            h5("Tribal challenges are the mostly physical, sometimes mental challenges before the Merge
                that determine which tribe gets sent to tribal council to vote off a member. They can
                also award winners with food or comfort items."),
             br(),
-            h4("Later, individual immunity challenges become the only way to guarantee safety in the game,
+            h5("Later, individual immunity challenges become the only way to guarantee safety in the game,
                and both help a player by providing security, but also hinder their game by publicizing
                their physical strength.")),
           mainPanel(width = 6,
@@ -211,11 +213,12 @@ ui <- fluidPage(
       tabPanel("Outlast",
         sidebarLayout(
           sidebarPanel(
+          img(src = "https://cdn.freebiesupply.com/logos/large/2x/survivor-logo-png-transparent.png", width = 225, height = 250),
           width = 3,
-          h4("Getting voted off is an automatic disqualifier for the 1 million dollar prize,
+          h5("Getting voted off is an automatic disqualifier for the 1 million dollar prize,
              so outlasting is one of the most important components to the game."),
           br(),
-          h4("Typically, three contestants last until the last day - they are dubbed the Final
+          h5("Typically, three contestants last until the last day - they are dubbed the Final
              Three and are voted upon to determine the ultimate Sole Survivor.")),
           mainPanel(
             width = 6,
@@ -239,7 +242,7 @@ ui <- fluidPage(
                               dense around the Northeast compared to all other areas in the United States,
                               besides Los Angeles."),
                           br(),
-                          plotOutput("animatedorderPlot")
+                          imageOutput("animatedorderPlot")
                           
                   ),
                   
@@ -272,6 +275,7 @@ ui <- fluidPage(
                      br(),
                      h5("Major thanks are owed to Dave Kwiatkowski for compiling ", a("the contestant data.", href="https://github.com/davekwiatkowski/survivor-data"),
                         "The", a("immunity idol data", href = "https://docs.google.com/spreadsheets/d/1jTtpv3pdivUWo3oF3nGBWcDnG69cTw63QHfXgsfXgTI/edit#gid=0"), "was obtained from Jeff Pitman as of March 2019."),
+                     h5("The ggmap package was also instrumental in geocoding the data: D. Kahle and H. Wickham. ggmap: Spatial Visualization with ggplot2. The R Journal, 5(1), 144-161, URL http://journal.r-project.org/archive/2013-1/kahle-wickham.pdf"),
                      br(),
                      h5("A link to the Github repository can be found", a("here.", href = "https://github.com/caievelyn/outwit_outplay_outlast"))
                    ),
@@ -844,28 +848,15 @@ server <- function(input, output) {
     
     })
     
-    output$animatedorderPlot <- renderPlot ({
+    output$animatedorderPlot <- renderImage ({
       
-      data <- survivor_data
+      # Return a list showing the file name
       
-      p <- data %>%
-        filter(is.na(finish)) %>%
-        ggplot(aes(x = finish, y = 0, color = gender)) +
-        geom_point() +
-        transition_manual(season_number) +
-        ggtitle("Season {current_frame}") +
-        labs(subtitle = "Order of those voted off, with 20th place on the far right and 1st on the left") +
-        theme_fivethirtyeight() +
-        theme(panel.grid = element_blank()) +
-        theme(axis.title = element_text()) +
-        scale_x_continuous(breaks = seq(1, 20, by = 1)) +
-        xlab("Finish") +
-        ylab(NULL)
-      
-      p
-      
-      
-    })
+      list(src = "www/outfile.gif",
+           contentType = 'image/gif',
+           width = 675,
+           height = 600
+      )}, deleteFile = FALSE)
     
 }
 

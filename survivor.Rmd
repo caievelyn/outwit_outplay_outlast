@@ -227,5 +227,55 @@ geo_join <- left_join(all_data, geocoded, by = "hometown")
 # Write to an rds file to read through the shiny app later
 
 write_rds(geo_join, "geo_join.rds")
-
 ```
+
+```{r message = FALSE, warning = FALSE}
+
+     data <- survivor_data
+      
+      # Store in an object to call through the animate() function later
+      
+      p <- data %>%
+        
+        # Call ggplot with the season_number on the x-axis acting as a
+        # categorical variable, with the votesAgainst on the y-axis, colored by
+        # gender
+        
+        ggplot(aes(x = season_number, y = votesAgainst, color = gender, size = age)) +
+        
+        # Call geom_point instead of jitter because the x-axis is being used as
+        # a categorical variable, so everything must be rather precise
+        
+        geom_point() +
+        
+        # Add a ggtitle that is dynamic based on the current finish place being
+        # displayed
+        
+        ggtitle("Votes against each place: Place {current_frame}") +
+        labs(subtitle = "Fewer votes against lower placing contestants") +
+        
+        # Change the theme to 538, and add back the axis titles. Change the x
+        # axis label, and get rid of the y axis label again
+        
+        theme_fivethirtyeight() +
+        theme(axis.title = element_text()) +
+        xlab("Season Number") +
+        ylab(NULL) +
+        
+        # Change the labelling on the x-axis, as labelling every season would
+        # get too crowded
+        
+        scale_x_continuous(breaks = seq(1, 37, by = 36), labels = c("1", "37")) +
+        
+        # Use a gganimate function to transition based on the finish place
+        
+        transition_manual(finish)
+      
+      # Animate as a rendered gif, specifying nframes as 100 to slow down the
+      # animation from the default speed. Save this as the outfile.gif.
+      
+      anim_save("outfile.gif",
+                path = "/Desktop/rProjects/outwit_outplay_outlast/survivor_shiny_app/www",
+                animate(p, nframes = 100, fps = 3))
+```
+
