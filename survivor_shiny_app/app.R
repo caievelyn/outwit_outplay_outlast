@@ -26,6 +26,8 @@ survivor_data <- read_rds("www/geo_join.rds")
 
 ui <- fluidPage(
   
+  setBackgroundImage(src = "https://www.hardwoodandhollywood.com/wp-content/uploads/2017/03/Survivor-1.jpg"),
+  
   # Change theme using shinytheme library to 'cosmo'
   
   theme = shinytheme("cosmo"),
