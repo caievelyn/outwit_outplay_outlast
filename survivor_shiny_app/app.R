@@ -25,9 +25,9 @@ survivor_data <- read_rds("www/geo_join.rds")
 
 ui <- fluidPage(
   
-  # Change theme using shinytheme library to 'united'
+  # Change theme using shinytheme library to 'cosmo'
   
-  theme = shinytheme("united"),
+  theme = shinytheme("cosmo"),
   
   # Application title
   
@@ -136,10 +136,10 @@ ui <- fluidPage(
         sidebarLayout(
           sidebarPanel(
             width = 3,
-            h5("Immunity Idols are a trademark of Survivor. When played correctly,
+            h4("Immunity Idols are a trademark of Survivor. When played correctly,
                they can guarantee immunity from being voted off for one tribal council."),
             br(),
-            h5("Due to their power, they are well-hidden and searching for hidden immunity
+            h4("Due to their power, they are well-hidden and searching for hidden immunity
                idols has become a staple of good players.")),
           mainPanel(width = 6,
             h2("Outwit: Idol Play"),
@@ -155,11 +155,11 @@ ui <- fluidPage(
         sidebarLayout(
           sidebarPanel(
             width = 3,
-            h5("Tribal challenges are the mostly physical, sometimes mental challenges before the Merge
+            h4("Tribal challenges are the mostly physical, sometimes mental challenges before the Merge
                that determine which tribe gets sent to tribal council to vote off a member. They can
                also award winners with food or comfort items."),
             br(),
-            h5("Later, individual immunity challenges become the only way to guarantee safety in the game,
+            h4("Later, individual immunity challenges become the only way to guarantee safety in the game,
                and both help a player by providing security, but also hinder their game by publicizing
                their physical strength.")),
           mainPanel(width = 6,
@@ -211,10 +211,10 @@ ui <- fluidPage(
         sidebarLayout(
           sidebarPanel(
           width = 3,
-          h5("Getting voted off is an automatic disqualifier for the 1 million dollar prize,
+          h4("Getting voted off is an automatic disqualifier for the 1 million dollar prize,
              so outlasting is one of the most important components to the game."),
           br(),
-          h5("Typically, three contestants last until the last day - they are dubbed the Final
+          h4("Typically, three contestants last until the last day - they are dubbed the Final
              Three and are voted upon to determine the ultimate Sole Survivor.")),
           mainPanel(
             width = 6,
@@ -224,7 +224,19 @@ ui <- fluidPage(
                   # Create one tab for winner analysis                
                           
                   tabPanel("Trends",
+                           h3("Hometowns of Survivor Contestants"),
+                           h5("Sole Survivors are in red"),
                            leafletOutput("outlastPlot")),
+                           br(),
+                  
+                           # Describe the trends seen in the map
+                  
+                           h4("As seen above, there is already a lack of representation
+                              of the Midwest. This is especially apparent for Sole Survivors, who
+                              hail heavily from the Northeast, Texas, and California. There is also
+                              a significant clumping effect around urban areas, and the plot is rather 
+                              dense around the Northeast compared to all other areas in the United States,
+                              besides Los Angeles."),
                   
                   # Create another tab for high-level trends and output a leaflet plot
                   
