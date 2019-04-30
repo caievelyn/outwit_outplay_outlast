@@ -31,7 +31,7 @@ ui <- fluidPage(
   
   # Application title
   
-  h1(" Survivor: Outwit, Outplay, Outlast"),
+  h1(" Survivor: What Does it Take to Win?"),
   
   # Add a caption detailing what the project is for
   
@@ -126,41 +126,40 @@ ui <- fluidPage(
               
           mainPanel(
             h2("Data Explorer: Survivor Contestants' Information"),
-              tabsetPanel(type = "tabs",
-                  tabPanel("Data Explorer", DT::dataTableOutput("data_explorer"))
-                  )
-              )
+            DT::dataTableOutput("data_explorer"))
           )
-          ),
+      ),
     
       # Create a tab in the navbar for the Outwit portion
     
       tabPanel("Outwit",
-          mainPanel(width = 8,
+        sidebarLayout(
+          sidebarPanel(
+            width = 3,
+            h4("Description of this portion")),
+          mainPanel(width = 6,
             h2("Outwit: Idol Play"),
-              tabsetPanel(type = "tabs",
-                  
-                  # Output the table for idol finding                
-                          
-                  tabPanel("Outwit", gt_output("idolfindingPlot"),
-                                     br(),
-                                     gt_output("idolfinding2Plot"))
-                  )
-              )
-          ),
+            gt_output("idolfindingPlot"),
+            br(),
+            gt_output("idolfinding2Plot"))
+        )
+      ),
     
       # Create a tab in the navbar for the outplay portion
     
       tabPanel("Outplay",
-          mainPanel(width = 8,
+        sidebarLayout(
+          sidebarPanel(
+            width = 3,
+            h4("description of this portion")),
+          mainPanel(width = 6,
             h2("Outplay: Immunity & Challenges"),
-              tabsetPanel(type = "tabs",
-                  tabPanel("Outplay",
                            
                            # Output the plot comparing three types of wins to
                            # the finish place of a contestant
                            
                            plotOutput("winsComparisonPlot"),
+                           br(),
                            
                            # Describe the negative correlation
                            
@@ -180,6 +179,7 @@ ui <- fluidPage(
                            # number of wins
                            
                            plotOutput("finalThreeComparisonPlot"),
+                           br(),
                            
                            # Describe the trend
                            
@@ -190,26 +190,32 @@ ui <- fluidPage(
                            number of wins influenced their ultimate win, or
                            whether a 'Sole Survivor'-type contestant just
                            naturally tends to win more, there is a clear
-                           indicator here that Sole Survivors tend to win."))
-                  )
+                           indicator here that Sole Survivors tend to win."),
+                           br())
               )
           ),
     
       # Create a tab in the navbar for the outlast portion
     
       tabPanel("Outlast",
+        sidebarLayout(
+          sidebarPanel(
+          width = 3,
+          h3("decsription")),
           mainPanel(
+            width = 6,
             h2("Outlast: What Makes a Survivor Contestant and Winner?"),
               tabsetPanel(type = "tabs",
                   
                   # Create one tab for winner analysis                
                           
-                  tabPanel("Winner Analysis"),
+                  tabPanel("Trends",
+                           leafletOutput("outlastPlot")),
                   
                   # Create another tab for high-level trends and output a leaflet plot
                   
-                  tabPanel("Trends",
-                           leafletOutput("outlastPlot")))
+                  tabPanel("Winner Analysis"))
+          )
               )
           ),
       
@@ -349,7 +355,7 @@ server <- function(input, output) {
   
     # Define the data_explorer output as a DataTable
     
-    output$data_explorer <- DT::renderDataTable({
+    output$data_explorer <- DT::renderDataTable ({
     
         # Require that a season is selected or else an error message will pop up
         
@@ -413,6 +419,102 @@ server <- function(input, output) {
       data <- survivor_data
       
       # Create an object p that will store the plot
+      
+      p <- data %>%
+        
+        # Group by the finish place so our calculations for the mean wins apply
+        # to each finishing group. Use summarize to easily calculate the mean
+        # and ungroup afterwards to prevent messing with the gather() function
+        
+        group_by(finish) %>%
+        summarize(wins_total = mean(totalWins),
+                  wins_tribal = mean(tribalChallengeWins),
+                  wins_ind = mean(individualChallengeWins)) %>%
+        ungroup() %>%
+        
+        # Replace NA values with 0 so that we can plot those points later. Call
+        # this after the calculation of the means, as recoding NA values to 0
+        # prior would falsely indicate that those who did not make it far enough
+        # in the show to participate in individual immunity challenges actually
+        # did get to participate, but did not win.
+        
+        mutate(wins_tribal = replace_na(wins_tribal, 0),
+               wins_ind = replace_na(wins_ind, 0)) %>%
+        
+        # Use the gather function to group key values into one column for ease
+        # of plotting, with their current values placed into a new column titled
+        # "value".
+        
+        gather(key = "win_type", value = "mean", wins_total, wins_tribal, wins_ind) %>%
+        
+        # Arrange by the finish place from first to twentieth
+        
+        arrange(finish) %>%
+        
+        # Group by the finish and win_type
+        
+        group_by(finish, win_type) %>%
+        
+        # Call a ggplot and pass the finish variable to the x-axis, and the mean
+        # values to the y-axis. Specify win_type as color so that three
+        # differently colored lines will be generated.
+        
+        ggplot(aes(x = finish, y = mean, color = win_type)) +
+        
+        # Add a line, making it slightly thicker for ease of reading. Turn off
+        # the legend, since we will be manually annotating the graph.
+        
+        geom_line(size = 1.1, show.legend = FALSE) +
+        
+        # Use the R Color Brewer palettes for color customization
+        
+        scale_color_brewer(type = 'seq', palette = 'Dark2') +
+        
+        # Use the annotate() function to manually add labels to each line, using
+        # the hex color code to match the line color.
+        
+        annotate("text", x = 3.5, y = 1, size = 5, color = "#289E80", label = "Individual") +
+        annotate("text", x = 4, y = 8.5, size = 5, color = "#E35934", label = "Total") +
+        annotate("text", x = 6, y = 5, size = 5, color = "#5639A6", label = "Tribal") +
+        
+        # Change the scaling and labelling of the x- and y- axes for ease of
+        # reading
+        
+        scale_x_continuous(breaks = seq(1, 20, by = 1)) +
+        scale_y_continuous(breaks = seq(0, 10, by = 2)) +
+        
+        # Add title and subtitle
+        
+        labs(title = "Average Wins per Place",
+             subtitle = "The higher placing contestants tend to win more on average") +
+        
+        # Change the theme to fivethirtyeight's theme, which is crisper and more
+        # minimal
+        
+        theme_fivethirtyeight() +
+        
+        # Add back the axis titles and change them for the x- and y-axes
+        
+        theme(axis.title = element_text()) +
+        xlab("Finish Place") +
+        ylab("Average Number of Wins")
+      
+      # Call the plot so that it will show
+      
+      p
+      
+    })
+    
+    # Render a faceted bar plot displaying the difference in average wins for
+    # those who lasted the same number of days based on finish place
+    
+    output$finalThreeComparisonPlot <- renderPlot({
+      
+      # Define data
+      
+      data <- survivor_data
+      
+      # Store the plot in an object to be called later
       
       p <- data %>%
         select(season_number, totalWins, tribalChallengeWins, individualChallengeWins, finish, daysLasted) %>%
@@ -503,91 +605,6 @@ server <- function(input, output) {
         
         xlab("Finishing Place") +
         ylab("Average Number of Wins")
-      
-      # Call the plot so that it will show
-      
-      p
-      
-    })
-    
-    # Render a faceted bar plot displaying the difference in average wins for
-    # those who lasted the same number of days based on finish place
-    
-    output$finalThreeComparisonPlot <- renderPlot({
-      
-      # Define data
-      
-      data <- survivor_data
-      
-      # Store the plot in an object to be called later
-      
-      p <- data %>%
-        select(season_number, totalWins, tribalChallengeWins, individualChallengeWins, finish, daysLasted) %>%
-        
-        # Group by season number and filter for those who lasted the maximum
-        # number of days for their season (indicating that they were in the
-        # Final Two or Final Three). Ungroup afterwards for ease of using the
-        # gather() function later.
-        
-        group_by(season_number) %>%
-        filter(daysLasted == max(daysLasted)) %>%
-        ungroup() %>%
-        
-        # Group by finish place and perform the mean function to find the mean
-        # for each type of win: tribal, individual, and total. Ungroup
-        # afterwards.
-        
-        group_by(finish) %>%
-        summarize(wins_total = mean(totalWins),
-                  wins_tribal = mean(tribalChallengeWins),
-                  wins_ind = mean(individualChallengeWins)) %>%
-        ungroup() %>%
-        
-        # Replace NA values with 0 so that we can plot those points later. Call
-        # this after the calculation of the means, as recoding NA values to 0
-        # prior would falsely indicate that those who did not make it far enough
-        # in the show to participate in individual immunity challenges actually
-        # did get to participate, but did not win.
-        
-        mutate(wins_tribal = replace_na(wins_tribal, 0),
-               wins_ind = replace_na(wins_ind, 0)) %>%
-        
-        # Use the gather function to group key values into one column for ease
-        # of plotting, with their current values placed into a new column titled
-        # "value".
-        
-        gather(key = "win_type", value = "mean", wins_total, wins_tribal, wins_ind) %>%
-        arrange(finish) %>%
-        
-        # Call a ggplot, passing finish place to the x- variable and mean to the
-        # y- variable. Fill the bar with a color that corresponds to the finish
-        # place, so that we can get rid of the legend.
-        
-        ggplot(aes(x = finish, y = mean, fill = finish)) +
-        
-        # Call a bar graph, getting rid of the legend
-        
-        geom_col(show.legend = FALSE) +
-        
-        # Use R Color Brewer palettes for color customization
-        
-        scale_color_brewer(type = "div", palette = "Dark2") +
-        
-        # Change the tick mark values and labels for the y-axis
-        
-        scale_y_continuous(breaks = seq(0, 10, by = 2)) +
-        
-        # Facet by the type of win (individual, total, and tribal)
-        
-        facet_wrap(~win_type) +
-        
-        # Change the labels and add an appropriate title and subtitle
-        
-        labs()
-        
-        # Alter theme to be more minimal
-        
-        theme_fivethirtyeight()
       
       # Call the plot so that it shows on the app
       
@@ -707,7 +724,15 @@ server <- function(input, output) {
   
     output$outlastPlot <- renderLeaflet({
     
-      data <- survivor_data
+      # Define data as all the points for contestants who were not winners
+      
+      data <- survivor_data %>%
+        filter(finish != 1)
+      
+      # Define data2 as the information for Sole Survivors
+      
+      data2 <- survivor_data %>%
+        filter(finish == 1)
       
       # Store object to call later
       
@@ -724,21 +749,72 @@ server <- function(input, output) {
         
         # Set the automatic view so that the United States are fully in view
         
-        setView(lng = -92.5, lat = 40, zoom = 3.25) %>%
+        setView(lng = -95, lat = 37.5, zoom = 3.5) %>%
         
-        # Add circle markers with a smaller radius due to the large number of
-        # points and add a popup with the name of the contestant
+        # Add circle markers that are blue for non-winners
         
-        addCircleMarkers(radius = 5, popup = ~contestant)
+        addCircleMarkers(radius = 8,
+                         
+                         # Remove the stroke, which adds to the radius
+                         
+                         stroke = FALSE,
+                         
+                         # Specify the fill color as blue and opacity as a
+                         # number between 0 and 1. I chose 0.45 as it allows you
+                         # to see the higher concentration of contestants
+                         # easily.
+                         
+                         fill = TRUE,
+                         fillColor = "blue",
+                         fillOpacity = 0.45,
+                         
+                         # Create popups that contain the contestant's name,
+                         # season number, and finish place.
+                         
+                         popup = paste(data$contestant, "<br>",
+                                       "Season ", data$season_number, ":",
+                                       data$season.x, "<br>",
+                                       "Finish: ", data$finish))
+      
+      # Create a second leaflet object based off the first one, this time with a
+      # different layer of colored circle markers for Sole Survivors
+      
+      m2 <- m %>%
+        
+        # Add circle markers that are red for winners
+        
+        addCircleMarkers(data = data2,
+                         radius = 8,
+                         
+                         # Remove the stroke, which adds to the radius
+                         
+                         stroke = FALSE,
+                         
+                         # Specify the fill color as red and increase the
+                         # opacity so it's easier to spot on a map of cool toned
+                         # colors.
+                         
+                         fill = TRUE,
+                         fillColor = "red",
+                         fillOpacity = 0.5,
+                         
+                         # Create popups that contain the contestant's name,
+                         # season number, and the fact that they were Sole
+                         # Survivor.
+                         
+                         popup = paste(data$contestant, "<br>",
+                                       "Season ", data$season_number, ":",
+                                       data$season.x, "<br>",
+                                       "Sole Survivor"))
       
       # Call leaflet object for display
       
-      m
+      m2
     
     })
     
 }
 
-
 # Run the application 
+
 shinyApp(ui = ui, server = server)
