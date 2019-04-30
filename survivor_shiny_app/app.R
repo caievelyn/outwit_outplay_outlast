@@ -831,15 +831,15 @@ server <- function(input, output) {
                          
                          fill = TRUE,
                          fillColor = "red",
-                         fillOpacity = 0.5,
+                         fillOpacity = 0.8,
                          
                          # Create popups that contain the contestant's name,
                          # season number, and the fact that they were Sole
                          # Survivor.
                          
-                         popup = paste(data$contestant, "<br>",
-                                       "Season ", data$season_number, ":",
-                                       data$season.x, "<br>",
+                         popup = paste(data2$contestant, "<br>",
+                                       "Season ", data2$season_number, ":",
+                                       data2$season.x, "<br>",
                                        "Sole Survivor"))
       
       # Call leaflet object for display
