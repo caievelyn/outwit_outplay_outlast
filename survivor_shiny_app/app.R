@@ -16,6 +16,9 @@ library(fivethirtyeight)
 library(ggmap)
 library(leaflet)
 library(gganimate)
+library(wordcloud2)
+library(NLP)
+library(tm)
 
 # Read in the rds file for the data on survivor contestants that includes the
 # geocoded location data and assign to survivor_data
@@ -235,13 +238,18 @@ ui <- fluidPage(
                           
                           # Describe the trend seen below
                           
-                          h3(strong("Gender and Getting Voted Out", style = "background-color:white")),
-                          h4("The Merge signifies the shift into a truly individual game. Players who do well
-                             in physical challenges pose a major threat to other contestants, since those players
-                             may win individual immunity often and thus will have less chances to get voted off.
-                             Interestingly, a lot of men who placed between 8-12 were voted off right after the Merge,
-                             probably as their former tribemates realized that their physical skill was a liability
-                             rather than an advantage.", style = "background-color: white"),
+                          h3(strong("Gender and Getting Voted Out", style =
+                          "background-color:white")),
+                          h4("The Merge signifies the shift into a truly
+                          individual game. Players who do well in physical
+                          challenges pose a major threat to other contestants,
+                          since those players may win individual immunity
+                          often and thus will have less chances to get voted
+                          off. Interestingly, a lot of men who placed between
+                          8-12 were voted off right after the Merge, probably
+                          as their former tribemates realized that their
+                          physical skill was a liability rather than an
+                          advantage.", style = "background-color: white"),
                           br(),
                           
                           # Display the gganimate gif
@@ -253,19 +261,33 @@ ui <- fluidPage(
                   # Create another tab for high-level trends and output a leaflet plot
                   
                   tabPanel("Winner Analysis",
-                           h3(strong("Hometowns of Survivor Contestants", style = "background-color: white")),
-                           h5("Sole Survivors are in red", style = "background-color: white"),
+                           h3(strong("Hometowns of Survivor Contestants",
+                           style = "background-color: white")),
+                           h5("Sole Survivors are in red", style =
+                           "background-color: white"),
                            leafletOutput("outlastPlot"),
                            br(),
-                           
+
                            # Describe the trends seen in the map
-                           
-                           h4("As seen above, there is already a lack of representation
-                              of the Midwest. This is especially apparent for Sole Survivors, who
-                              hail heavily from the Northeast, Texas, and California. There is also
-                              a significant clumping effect around urban areas, and the plot is rather 
-                              dense around the Northeast compared to all other areas in the United States,
-                              besides Los Angeles.", style = "background-color: white"))
+
+                           h4("As seen above, there is already a lack of
+                           representation of the Midwest. This is especially
+                           apparent for Sole Survivors, who hail heavily from
+                           the Northeast, Texas, and California. There is also
+                           a significant clumping effect around urban areas,
+                           and the plot is rather dense around the Northeast
+                           compared to all other areas in the United States,
+                           besides Los Angeles.", style = "background-color:
+                           white"), br(),
+
+                           # Output wordcloud
+                           h3(strong("Common Occupations of
+                           Survivor Contestants")),
+                           wordcloud2Output("cloud")), h4("The most common
+                           profession is student. Poker players do not
+                           comprise as big of a population as we think, but
+                           teachers, attorneys, sales managers and associates,
+                           and consultants do.", style = "background-color:white")
           )
               )
           )
@@ -866,6 +888,8 @@ server <- function(input, output) {
     
     })
     
+    # Call gganimate gif as an image
+    
     output$animatedorderPlot <- renderImage ({
       
       # Return a list showing the file name
@@ -874,7 +898,48 @@ server <- function(input, output) {
            contentType = 'image/gif',
            width = 675,
            height = 600
+      
+      # Do not delete file since the RMD creating the file was only run once
+           
       )}, deleteFile = FALSE)
+    
+    # Create wordcloud of professions
+    
+    output$cloud <- renderWordcloud2({
+      
+      # Creates a function that makes a wordcloud. Courtesy of DataCamp
+      
+      create_wordcloud <- function(data, num_words = 100, background = "white") {
+        
+        # If text is provided, convert it to a dataframe of word frequencies
+        if (is.character(data)) {
+          corpus <- Corpus(VectorSource(data))
+          corpus <- tm_map(corpus, tolower)
+          corpus <- tm_map(corpus, removePunctuation)
+          corpus <- tm_map(corpus, removeWords, stopwords("english"))
+          tdm <- as.matrix(TermDocumentMatrix(corpus))
+          data <- sort(rowSums(tdm), decreasing = TRUE)
+          data <- data.frame(word = names(data), freq = as.numeric(data))
+        }
+        
+        # Make sure a proper num_words is provided
+        if (!is.numeric(num_words) || num_words < 3) {
+          num_words <- 3
+        }  
+        
+        # Grab the top n most common words
+        data <- head(data, n = num_words)
+        if (nrow(data) == 0) {
+          return(NULL)
+        }
+        
+        wordcloud2(data, backgroundColor = background)
+      }
+    
+      
+      create_wordcloud(survivor_data$occupation,
+                       num_words = 75)
+    })
     
 }
 
