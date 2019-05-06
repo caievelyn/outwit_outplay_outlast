@@ -34,11 +34,11 @@ ui <- fluidPage(
   
   # Application title
   
-  h1(" Survivor: What Does it Take to Win?"),
+  h1(strong(" Survivor: What Does it Take to Win?", style = "color: white")),
   
   # Add a caption detailing what the project is for
   
-  h3("by Evelyn Cai for GOV1005"),
+  h3("by Evelyn Cai", style = "color:white"),
   
   # Create the navigation bar, making the title blank
   
@@ -128,7 +128,7 @@ ui <- fluidPage(
           # tables, which are interactive
               
           mainPanel(
-            h2("Data Explorer: Survivor Contestants' Information"),
+            h2(strong("Data Explorer: Survivor Contestants' Information", style = "background-color: white")),
             DT::dataTableOutput("data_explorer"))
           )
       ),
@@ -146,7 +146,7 @@ ui <- fluidPage(
             h5("Due to their power, they are well-hidden and searching for hidden immunity
                idols has become a staple of good players.")),
           mainPanel(width = 6,
-            h2("Outwit: Idol Play"),
+            h2(strong("Outwit: Idol Play", style = "background-color: white", align = "center")),
             gt_output("idolfindingPlot"),
             br(),
             gt_output("idolfinding2Plot"))
@@ -168,7 +168,7 @@ ui <- fluidPage(
                and both help a player by providing security, but also hinder their game by publicizing
                their physical strength.")),
           mainPanel(width = 6,
-            h2("Outplay: Immunity & Challenges"),
+            h2(strong("Outplay: Immunity & Challenges", style = "background-color: white", align = "center")),
                            
                            # Output the plot comparing three types of wins to
                            # the finish place of a contestant
@@ -186,7 +186,8 @@ ui <- fluidPage(
                            higher have more opportunities to win since they
                            stay in the game longer. Therefore, we can take a
                            look at the Final Three contestants who lasted
-                           until day 39 for every season, as pictured below."),
+                           until day 39 for every season, as pictured below.",
+                           style = "background-color: white"),
                            br(),
                            
                            # Output the plot comparing the finish place of the
@@ -205,7 +206,8 @@ ui <- fluidPage(
                            number of wins influenced their ultimate win, or
                            whether a 'Sole Survivor'-type contestant just
                            naturally tends to win more, there is a clear
-                           indicator here that Sole Survivors tend to win."),
+                           indicator here that Sole Survivors tend to win.",
+                           style = "background-color: white"),
                            br())
               )
           ),
@@ -224,36 +226,50 @@ ui <- fluidPage(
              Three and are voted upon to determine the ultimate Sole Survivor.")),
           mainPanel(
             width = 6,
-            h2("Outlast: What Makes a Survivor Contestant and Winner?"),
+            h2(strong("Outlast: What Makes a Survivor Contestant and Winner?", style = "background-color: white", align = "center")),
               tabsetPanel(type = "tabs",
                   
                   # Create one tab for winner analysis                
                           
                   tabPanel("Trends",
-                           h3("Hometowns of Survivor Contestants"),
-                           h5("Sole Survivors are in red"),
-                           leafletOutput("outlastPlot"),
-                           br(),
-                  
-                           # Describe the trends seen in the map
-                  
-                           h4("As seen above, there is already a lack of representation
-                              of the Midwest. This is especially apparent for Sole Survivors, who
-                              hail heavily from the Northeast, Texas, and California. There is also
-                              a significant clumping effect around urban areas, and the plot is rather 
-                              dense around the Northeast compared to all other areas in the United States,
-                              besides Los Angeles."),
+                          
+                          # Describe the trend seen below
+                          
+                          h3(strong("Gender and Getting Voted Out", style = "background-color:white")),
+                          h4("The Merge signifies the shift into a truly individual game. Players who do well
+                             in physical challenges pose a major threat to other contestants, since those players
+                             may win individual immunity often and thus will have less chances to get voted off.
+                             Interestingly, a lot of men who placed between 8-12 were voted off right after the Merge,
+                             probably as their former tribemates realized that their physical skill was a liability
+                             rather than an advantage.", style = "background-color: white"),
                           br(),
+                          
+                          # Display the gganimate gif
+                          
                           imageOutput("animatedorderPlot")
                           
                   ),
                   
                   # Create another tab for high-level trends and output a leaflet plot
                   
-                  tabPanel("Winner Analysis"))
+                  tabPanel("Winner Analysis",
+                           h3(strong("Hometowns of Survivor Contestants", style = "background-color: white")),
+                           h5("Sole Survivors are in red", style = "background-color: white"),
+                           leafletOutput("outlastPlot"),
+                           br(),
+                           
+                           # Describe the trends seen in the map
+                           
+                           h4("As seen above, there is already a lack of representation
+                              of the Midwest. This is especially apparent for Sole Survivors, who
+                              hail heavily from the Northeast, Texas, and California. There is also
+                              a significant clumping effect around urban areas, and the plot is rather 
+                              dense around the Northeast compared to all other areas in the United States,
+                              besides Los Angeles.", style = "background-color: white"))
           )
               )
-          ),
+          )
+        ),
       
       # Add an panel that explains what Survivor is and where the data comes
       # from
@@ -292,7 +308,7 @@ ui <- fluidPage(
                  # width 3
                    
                  width = 6,
-                 h2("The Hit CBS Reality TV Show"),
+                 h2(strong("The Hit CBS Reality TV Show", style = "background-color: white")),
                  h4("Survivor is a hit reality TV show produced by
                     CBS. Since its first episode aired in May 2000,
                     Survivor has enjoyed consistently high rates of
@@ -311,9 +327,9 @@ ui <- fluidPage(
                     strategizing and forming alliances are crucial to
                     gameplay. Once around half of the participants are
                     left, the tribes merge into one, a process dubbed
-                    as 'The Merge'."),
+                    as 'The Merge'.", style = "background-color: white"),
                  br(),
-                 h2("The Merge: Voting and Strategy"),
+                 h2(strong("The Merge: Voting and Strategy", style = "background-color: white")),
                  h4("The Merge typically signifies truly individual
                     gameplay; sometimes players vote with their voting
                     bloc to ensure that they are able to stick around,
@@ -323,10 +339,10 @@ ui <- fluidPage(
                     voted off post-merge. Contestants are expected to
                     balance a fine line by making flashy and bold moves
                     to impress the jury, while also making sure not to
-                    offend the jury or create personal tension."),
+                    offend the jury or create personal tension.", style = "background-color: white"),
                  br(),
-                 h2("Outwit, Outplay, Outlast"),
-                 h3("Outwit"),
+                 h2(strong("Outwit, Outplay, Outlast", style = "background-color: white")),
+                 h3("Outwit", style = "background-color: white"),
                  h4("The multifaceted nature of this complex game can
                     be captured in the three areas that a successful
                     contestant excels in: Outwit, Outplay, and Outlast.
@@ -341,8 +357,8 @@ ui <- fluidPage(
                     played at one tribal council. Many players have
                     potentially lost $1 million or kept themselves in
                     the game depending on their usage of their immunity
-                    idol."),
-                 h3("Outplay"),
+                    idol.", style = "background-color: white"),
+                 h3("Outplay", style = "background-color: white"),
                  h4("The second area is Outplay, which involves the
                     large physical portion of the game. Survivor sees
                     contestants lose dozens of pounds due to
@@ -351,17 +367,17 @@ ui <- fluidPage(
                     council. Outplaying also entails the proper usages
                     of legacies and advantages gifted to players, as
                     well as maintaining a healthy social game and being
-                    able to 'rally the troops' or so to speak."),
-                 h3("Outlast"),
+                    able to 'rally the troops' or so to speak.", style = "background-color: white"),
+                 h3("Outlast", style = "background-color: white"),
                  h4("Lastly, of course, you must outlast the other
                     players. With the exception of one season, the last
                     day is the 39th day. Outlasting entails all of the
                     above: ensuring you get enough food to eat to stay
                     physically well, ensuring your social relationships
                     maintain your social spot in the game, and doing
-                    well in challenges to accomplish both tasks."),
+                    well in challenges to accomplish both tasks.", style = "background-color: white"),
                  br(),
-                 h2("Guiding Questions"),
+                 h2(strong("Guiding Questions", style = "background-color: white")),
                  br(),
                  h4("I am curious about high-level trends that
                     distinguish those who win from those who do not.
@@ -380,7 +396,7 @@ ui <- fluidPage(
                     therefore correlated with a higher finish place, or
                     are less votes a sign that someone wasn't really a
                     contender for the game and corresponds to a lower
-                    finish place?"))
+                    finish place?", style = "background-color: white"))
                  )
                  )
       )
