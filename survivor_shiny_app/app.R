@@ -232,65 +232,61 @@ ui <- fluidPage(
             h2(strong("Outlast: What Makes a Survivor Contestant and Winner?", style = "background-color: white", align = "center")),
               tabsetPanel(type = "tabs",
                   
-                  # Create one tab for winner analysis                
-                          
-                  tabPanel("Trends",
-                          
-                          # Describe the trend seen below
-                          
-                          h3(strong("Gender and Getting Voted Out", style =
-                          "background-color:white")),
-                          h4("The Merge signifies the shift into a truly
-                          individual game. Players who do well in physical
-                          challenges pose a major threat to other contestants,
-                          since those players may win individual immunity
-                          often and thus will have less chances to get voted
-                          off. Interestingly, a lot of men who placed between
-                          8-12 were voted off right after the Merge, probably
-                          as their former tribemates realized that their
-                          physical skill was a liability rather than an
-                          advantage.", style = "background-color: white"),
-                          br(),
-                          
-                          # Display the gganimate gif
-                          
-                          imageOutput("animatedorderPlot")
-                          
-                  ),
+                  # Create another tab for the common occupations of Survivor
+                  # contestants
                   
-                  # Create another tab for high-level trends and output a leaflet plot
+                  tabPanel("Occupation",
+                           
+                           # Add a descriptive title
+                           
+                           h3(strong("Common Occupations of
+                           Survivor Contestants"), style = "background-color: White"),
+                           
+                           # Output the word cloud
+                           
+                           wordcloud2Output("cloud"),
                   
-                  tabPanel("Winner Analysis",
+                           h4("The most common profession is student. Poker
+                           players do not comprise as big of a population as
+                           we think, but teachers, attorneys, sales managers
+                           and associates, and consultants do.",
+                           style = "background-color:white")
+              ),    
+                          
+                          
+                  # Create one tab for the leaflet plot that shows hometowns
+                          
+                  tabPanel("Hometown",
+                           
+                           # Add titles and a subtitle that explains what the
+                           # red dots are
+                          
                            h3(strong("Hometowns of Survivor Contestants",
-                           style = "background-color: white")),
+                                     style = "background-color: white")),
                            h5("Sole Survivors are in red", style =
-                           "background-color: white"),
+                                "background-color: white"),
+                           
+                           # Output leaflet plot
+                           
                            leafletOutput("outlastPlot"),
                            br(),
-
+                           
                            # Describe the trends seen in the map
-
+                           
                            h4("As seen above, there is already a lack of
-                           representation of the Midwest. This is especially
-                           apparent for Sole Survivors, who hail heavily from
-                           the Northeast, Texas, and California. There is also
-                           a significant clumping effect around urban areas,
-                           and the plot is rather dense around the Northeast
-                           compared to all other areas in the United States,
-                           besides Los Angeles.", style = "background-color:
-                           white"), br(),
-
-                           # Output wordcloud
-                           h3(strong("Common Occupations of
-                           Survivor Contestants")),
-                           wordcloud2Output("cloud")), h4("The most common
-                           profession is student. Poker players do not
-                           comprise as big of a population as we think, but
-                           teachers, attorneys, sales managers and associates,
-                           and consultants do.", style = "background-color:white")
-          )
+                              representation of the Midwest. This is especially
+                              apparent for Sole Survivors, who hail heavily from
+                              the Northeast, Texas, and California. There is also
+                              a significant clumping effect around urban areas,
+                              and the plot is rather dense around the Northeast
+                              compared to all other areas in the United States,
+                              besides Los Angeles.", style = "background-color:
+                              white"), br()
+                          
+                  )
               )
           )
+        )
         ),
       
       # Add an panel that explains what Survivor is and where the data comes
@@ -311,8 +307,6 @@ ui <- fluidPage(
                      
                      # Add hyperlinks to the data sources and Github repo within the headers
                      
-                     h5("This project was created for Gov 1005: Data, a course taught by David Kane at Harvard University."),
-                     br(),
                      h5("Major thanks are owed to Dave Kwiatkowski for compiling ", a("the contestant data.", href="https://github.com/davekwiatkowski/survivor-data"),
                         "The", a("immunity idol data", href = "https://docs.google.com/spreadsheets/d/1jTtpv3pdivUWo3oF3nGBWcDnG69cTw63QHfXgsfXgTI/edit#gid=0"), "was obtained from Jeff Pitman as of March 2019."),
                      h5("The ggmap package was also instrumental in geocoding the data: D. Kahle and H. Wickham. ggmap: Spatial Visualization with ggplot2. The R Journal, 5(1), 144-161, URL http://journal.r-project.org/archive/2013-1/kahle-wickham.pdf"),
@@ -476,7 +470,27 @@ server <- function(input, output) {
         if (length(input$gender_check) == 1) {
           data <- filter(data, gender == input$gender_check)
         }
-    
+        
+        # Relabel the column names so they are more easily readable
+        
+        data <- setNames(data, c("Contestant",
+                                 "Age",
+                                 "Hometown",
+                                 "Season Name",
+                                 "Finish Place",
+                                 "Tribal Challenge Wins",
+                                 "Individual Challenge Wins",
+                                 "Total Wins",
+                                 "Days Lasted",
+                                 "Votes Against",
+                                 "Gender",
+                                 "Occupation",
+                                 "Season Number",
+                                 "Idols Found",
+                                 "Idols Played",
+                                 "Hometown Longitude Coordinate",
+                                 "Hometown Latitude Coordinate"))
+        
         # Call data again to actually display the transformed data; if the data
         # was not altered, then the original data will be displayed
         
@@ -546,11 +560,14 @@ server <- function(input, output) {
         scale_color_brewer(type = 'seq', palette = 'Dark2') +
         
         # Use the annotate() function to manually add labels to each line, using
-        # the hex color code to match the line color.
+        # the hex color code to match the line color. Specify that it is
+        # ggplot2's package, since we also loaded the NLP package, which
+        # contains an annotate() function. Otherwise, we will get an error
+        # message.
         
-        annotate("text", x = 3.5, y = 1, size = 5, color = "#289E80", label = "Individual") +
-        annotate("text", x = 4, y = 8.5, size = 5, color = "#E35934", label = "Total") +
-        annotate("text", x = 6, y = 5, size = 5, color = "#5639A6", label = "Tribal") +
+        ggplot2::annotate("text", x = 3.5, y = 1, size = 5, color = "#289E80", label = "Individual") +
+        ggplot2::annotate("text", x = 4, y = 8.5, size = 5, color = "#E35934", label = "Total") +
+        ggplot2::annotate("text", x = 6, y = 5, size = 5, color = "#5639A6", label = "Tribal") +
         
         # Change the scaling and labelling of the x- and y- axes for ease of
         # reading
@@ -887,21 +904,6 @@ server <- function(input, output) {
       m2
     
     })
-    
-    # Call gganimate gif as an image
-    
-    output$animatedorderPlot <- renderImage ({
-      
-      # Return a list showing the file name
-      
-      list(src = "www/outfile.gif",
-           contentType = 'image/gif',
-           width = 675,
-           height = 600
-      
-      # Do not delete file since the RMD creating the file was only run once
-           
-      )}, deleteFile = FALSE)
     
     # Create wordcloud of professions
     
