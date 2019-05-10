@@ -152,7 +152,14 @@ ui <- fluidPage(
             h2(strong("Outwit: Idol Play", style = "background-color: white", align = "center")),
             gt_output("idolfindingPlot"),
             br(),
-            gt_output("idolfinding2Plot"))
+            gt_output("idolfinding2Plot"),
+            br(),
+            h4("Maybe Survivor winners are just really good at finding idols -
+            over 40% of them found at least one. Or, maybe the act of finding
+            idols and later, playing them, influences the finish place of a
+            player. Either way, there is strong evidence that finding idols
+            more than on average and winning are correlated.", style = "background-color: White")
+        )
         )
       ),
     
@@ -392,30 +399,11 @@ ui <- fluidPage(
                     physically well, ensuring your social relationships
                     maintain your social spot in the game, and doing
                     well in challenges to accomplish both tasks.", style = "background-color: white"),
-                 br(),
-                 h2(strong("Guiding Questions", style = "background-color: white")),
-                 br(),
-                 h4("I am curious about high-level trends that
-                    distinguish those who win from those who do not.
-                    Does age play a factor? Gender? What are the
-                    occupations of those who win? Where do Survivor
-                    contestants call home - is it a uniform spread
-                    across the map, as CBS may be looking for diversity,
-                    or are there clusters around metropolitan areas? How
-                    do people play immunity idols, and does their usage
-                    have an effect on how many days someone lasts? Do
-                    winners excel more in the Outwit, Outplay, or
-                    Outlast area? What distinguishes the winner from the
-                    other two runner-ups who survive all 39 days as
-                    well? Are less votes against someone a good
-                    indicator that they ran below the radar and
-                    therefore correlated with a higher finish place, or
-                    are less votes a sign that someone wasn't really a
-                    contender for the game and corresponds to a lower
-                    finish place?", style = "background-color: white"))
+                 br()
                  )
                  )
-      )
+        )
+  )
 )
 
 # Define server logic required to output the various plots
